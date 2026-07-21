@@ -3,11 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <title>CyberQR - Encurtador & Gerador de Etiquetas 33x21mm</title>
-  <!-- Google Fonts futuristas -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-  <!-- Gerador de QR Code JS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     :root {
@@ -20,12 +18,7 @@
       --text-dim: #7a8c9e;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      user-select: none;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
 
     body {
       background-color: var(--bg-dark);
@@ -45,7 +38,6 @@
       overflow-x: hidden;
     }
 
-    /* Header Cyberpunk */
     header {
       width: 100%;
       max-width: 1100px;
@@ -60,375 +52,104 @@
       clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
     }
 
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
+    .brand { display: flex; align-items: center; gap: 12px; }
     .brand-icon {
-      width: 32px;
-      height: 32px;
-      border: 2px solid var(--cyan-glow);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      width: 32px; height: 32px; border: 2px solid var(--cyan-glow);
+      display: flex; align-items: center; justify-content: center;
       box-shadow: 0 0 10px var(--cyan-glow);
       clip-path: polygon(20% 0, 100% 0, 100% 80%, 80% 100%, 0 100%, 0 20%);
     }
+    .brand-icon::after { content: ''; width: 12px; height: 12px; background: var(--cyan-glow); }
 
-    .brand-icon::after {
-      content: '';
-      width: 12px;
-      height: 12px;
-      background: var(--cyan-glow);
-    }
+    h1 { font-family: 'Orbitron', sans-serif; font-size: 1.5rem; font-weight: 800; letter-spacing: 2px; color: #fff; text-shadow: 0 0 8px rgba(0, 240, 255, 0.6); }
+    h1 span { color: var(--cyan-glow); }
 
-    h1 {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 1.5rem;
-      font-weight: 800;
-      letter-spacing: 2px;
-      color: #fff;
-      text-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
-    }
+    .sys-status { font-family: 'Orbitron', sans-serif; font-size: 0.75rem; color: var(--green-glow); display: flex; align-items: center; gap: 8px; letter-spacing: 1px; }
+    .pulse-dot { width: 8px; height: 8px; background-color: var(--green-glow); border-radius: 50%; box-shadow: 0 0 8px var(--green-glow); animation: pulse 1.5s infinite; }
 
-    h1 span {
-      color: var(--cyan-glow);
-    }
+    @keyframes pulse { 0% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } 100% { opacity: 0.3; transform: scale(0.8); } }
 
-    .sys-status {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.75rem;
-      color: var(--green-glow);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      letter-spacing: 1px;
-    }
+    .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; width: 100%; max-width: 1100px; }
+    @media (max-width: 850px) { .dashboard-grid { grid-template-columns: 1fr; } }
 
-    .pulse-dot {
-      width: 8px;
-      height: 8px;
-      background-color: var(--green-glow);
-      border-radius: 50%;
-      box-shadow: 0 0 8px var(--green-glow);
-      animation: pulse 1.5s infinite;
-    }
-
-    @keyframes pulse {
-      0% { opacity: 0.3; transform: scale(0.8); }
-      50% { opacity: 1; transform: scale(1.2); }
-      100% { opacity: 0.3; transform: scale(0.8); }
-    }
-
-    /* Grid do Dashboard */
-    .dashboard-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 25px;
-      width: 100%;
-      max-width: 1100px;
-    }
-
-    @media (max-width: 850px) {
-      .dashboard-grid { grid-template-columns: 1fr; }
-    }
-
-    /* Painéis */
     .panel {
-      background: var(--panel-bg);
-      border: 1px solid var(--border-color);
-      padding: 25px;
-      position: relative;
-      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
-      clip-path: polygon(0 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
+      background: var(--panel-bg); border: 1px solid var(--border-color); padding: 25px; position: relative;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5); clip-path: polygon(0 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
     }
+    .panel::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, var(--cyan-glow), transparent); }
 
-    .panel::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background: linear-gradient(90deg, var(--cyan-glow), transparent);
-    }
+    .panel-title { font-family: 'Orbitron', sans-serif; font-size: 1rem; color: var(--cyan-glow); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; letter-spacing: 1px; text-transform: uppercase; }
+    .panel-title::before { content: '//'; color: var(--magenta-glow); }
 
-    .panel-title {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 1rem;
-      color: var(--cyan-glow);
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-    }
-
-    .panel-title::before {
-      content: '//';
-      color: var(--magenta-glow);
-    }
-
-    /* Formulário */
     .input-group { margin-bottom: 18px; }
-
-    label {
-      display: block;
-      font-size: 0.85rem;
-      color: var(--text-dim);
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
+    label { display: block; font-size: 0.85rem; color: var(--text-dim); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
 
     input[type="text"] {
-      width: 100%;
-      padding: 12px 15px;
-      background: rgba(4, 8, 15, 0.8);
-      border: 1px solid rgba(0, 240, 255, 0.2);
-      color: #fff;
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 1rem;
-      outline: none;
-      transition: all 0.3s;
+      width: 100%; padding: 12px 15px; background: rgba(4, 8, 15, 0.8); border: 1px solid rgba(0, 240, 255, 0.2);
+      color: #fff; font-family: 'Rajdhani', sans-serif; font-size: 1rem; outline: none; transition: all 0.3s;
     }
+    input[type="text"]:focus { border-color: var(--cyan-glow); box-shadow: 0 0 10px rgba(0, 240, 255, 0.3); }
 
-    input[type="text"]:focus {
-      border-color: var(--cyan-glow);
-      box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
-    }
+    .spec-badge { display: inline-block; padding: 4px 10px; background: rgba(0, 240, 255, 0.1); border: 1px solid var(--cyan-glow); color: var(--cyan-glow); font-family: 'Orbitron', sans-serif; font-size: 0.75rem; margin-bottom: 15px; }
+    .status-text { font-size: 0.8rem; color: var(--cyan-glow); margin-top: 5px; min-height: 18px; }
 
-    .spec-badge {
-      display: inline-block;
-      padding: 4px 10px;
-      background: rgba(0, 240, 255, 0.1);
-      border: 1px solid var(--cyan-glow);
-      color: var(--cyan-glow);
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.75rem;
-      margin-bottom: 15px;
-    }
-
-    .status-text {
-      font-size: 0.8rem;
-      color: var(--cyan-glow);
-      margin-top: 5px;
-      min-height: 18px;
-    }
-
-    /* Botões */
-    .btn-group {
-      display: flex;
-      gap: 12px;
-      margin-top: 25px;
-    }
-
+    .btn-group { display: flex; gap: 12px; margin-top: 25px; }
     .btn {
-      flex: 1;
-      padding: 14px;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.85rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      border: none;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
+      flex: 1; padding: 14px; font-family: 'Orbitron', sans-serif; font-size: 0.85rem; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase; border: none; cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
     }
+    .btn-primary { background: var(--cyan-glow); color: #000; box-shadow: 0 0 15px rgba(0, 240, 255, 0.4); clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
+    .btn-primary:hover { background: #fff; box-shadow: 0 0 25px rgba(0, 240, 255, 0.8); transform: translateY(-2px); }
+    .btn-secondary { background: transparent; border: 1px solid var(--magenta-glow); color: var(--magenta-glow); box-shadow: 0 0 10px rgba(255, 0, 85, 0.2); clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
+    .btn-secondary:hover { background: rgba(255, 0, 85, 0.15); color: #fff; box-shadow: 0 0 20px rgba(255, 0, 85, 0.5); transform: translateY(-2px); }
 
-    .btn-primary {
-      background: var(--cyan-glow);
-      color: #000;
-      box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
-      clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
-    }
+    .preview-stage { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 280px; background: rgba(4, 8, 15, 0.9); border: 1px dashed rgba(0, 240, 255, 0.2); padding: 20px; position: relative; }
+    .label-outer-wrapper { position: relative; padding: 10px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 4px; }
+    .label-outer-wrapper::after { content: 'ESCALA VIRTUAL 1:1 (33x21mm)'; position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%); font-size: 0.65rem; font-family: 'Orbitron', sans-serif; color: var(--text-dim); white-space: nowrap; }
 
-    .btn-primary:hover {
-      background: #fff;
-      box-shadow: 0 0 25px rgba(0, 240, 255, 0.8);
-      transform: translateY(-2px);
-    }
-
-    .btn-secondary {
-      background: transparent;
-      border: 1px solid var(--magenta-glow);
-      color: var(--magenta-glow);
-      box-shadow: 0 0 10px rgba(255, 0, 85, 0.2);
-      clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
-    }
-
-    .btn-secondary:hover {
-      background: rgba(255, 0, 85, 0.15);
-      color: #fff;
-      box-shadow: 0 0 20px rgba(255, 0, 85, 0.5);
-      transform: translateY(-2px);
-    }
-
-    /* Área de Pré-Visualização */
-    .preview-stage {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 280px;
-      background: rgba(4, 8, 15, 0.9);
-      border: 1px dashed rgba(0, 240, 255, 0.2);
-      padding: 20px;
-      position: relative;
-    }
-
-    .label-outer-wrapper {
-      position: relative;
-      padding: 10px;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 4px;
-    }
-
-    .label-outer-wrapper::after {
-      content: 'ESCALA VIRTUAL 1:1 (33x21mm)';
-      position: absolute;
-      bottom: -22px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 0.65rem;
-      font-family: 'Orbitron', sans-serif;
-      color: var(--text-dim);
-      white-space: nowrap;
-    }
-
-    /* Modelo de Etiqueta BOPP Realista no Navegador */
+    /* ETIQUETA COM MARGEM DE SEGURANÇA (QUIET ZONE) */
     .bopp-label-preview {
-      width: 165px; /* Proporção 33mm */
-      height: 105px; /* Proporção 21mm */
-      background: #ffffff;
-      border-radius: 2px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 4px;
-      color: #000;
-      box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
-      position: relative;
-      overflow: hidden;
+      width: 165px; height: 105px; background: #ffffff; border-radius: 2px;
+      display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+      padding: 6px 4px 4px 4px; color: #000; box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+      position: relative; overflow: hidden;
     }
 
     .bopp-label-preview #qrcode-container {
-      width: 72px;
-      height: 72px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      width: 65px; height: 65px; display: flex; align-items: center; justify-content: center;
+      background: #fff; padding: 2px; /* Força margem branca ao redor */
     }
 
-    .bopp-label-preview #qrcode-container img {
-      width: 100% !important;
-      height: 100% !important;
-      image-rendering: pixelated;
-    }
+    .bopp-label-preview #qrcode-container img { width: 100% !important; height: 100% !important; image-rendering: pixelated; }
 
     .bopp-label-preview .label-code {
-      font-family: Arial, sans-serif;
-      font-size: 8px;
-      font-weight: bold;
-      color: #000;
-      margin-top: 2px;
-      text-align: center;
-      max-width: 155px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      font-family: Arial, sans-serif; font-size: 8px; font-weight: bold; color: #000;
+      text-align: center; max-width: 155px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      margin-top: 1px;
     }
 
-    .bopp-label-preview .label-subtext {
-      font-family: Arial, sans-serif;
-      font-size: 6px;
-      color: #333;
-      text-align: center;
-    }
+    .bopp-label-preview .label-subtext { font-family: Arial, sans-serif; font-size: 6px; color: #333; text-align: center; }
 
-    /* REGRAS DE IMPRESSÃO (REMOVE O DASHBOARD E IMPRIME APENAS A ETIQUETA) */
     @media print {
-      @page {
-        size: 33mm 21mm;
-        margin: 0;
-      }
-
-      *, *::before, *::after {
-        box-shadow: none !important;
-        text-shadow: none !important;
-      }
-
-      body {
-        background: #fff !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        width: 33mm !important;
-        height: 21mm !important;
-        display: block !important;
-      }
-
-      header, .dashboard-grid > .panel:first-child, .panel-title, .spec-badge, .btn-group, .label-outer-wrapper::after, .status-text {
-        display: none !important;
-      }
-
-      .dashboard-grid {
-        display: block !important;
-        width: 33mm !important;
-      }
-
-      .panel {
-        border: none !important;
-        background: transparent !important;
-        padding: 0 !important;
-        clip-path: none !important;
-      }
-
-      .preview-stage {
-        background: transparent !important;
-        border: none !important;
-        min-height: 0 !important;
-        padding: 0 !important;
-      }
-
-      .label-outer-wrapper {
-        padding: 0 !important;
-        border: none !important;
-        background: transparent !important;
-      }
+      @page { size: 33mm 21mm; margin: 0; }
+      *, *::before, *::after { box-shadow: none !important; text-shadow: none !important; }
+      body { background: #fff !important; padding: 0 !important; margin: 0 !important; width: 33mm !important; height: 21mm !important; display: block !important; }
+      header, .dashboard-grid > .panel:first-child, .panel-title, .spec-badge, .btn-group, .label-outer-wrapper::after, .status-text { display: none !important; }
+      .dashboard-grid { display: block !important; width: 33mm !important; }
+      .panel { border: none !important; background: transparent !important; padding: 0 !important; clip-path: none !important; }
+      .preview-stage { background: transparent !important; border: none !important; min-height: 0 !important; padding: 0 !important; }
+      .label-outer-wrapper { padding: 0 !important; border: none !important; background: transparent !important; }
 
       .bopp-label-preview {
-        width: 33mm !important;
-        height: 21mm !important;
-        box-shadow: none !important;
-        border-radius: 0 !important;
-        padding: 1mm !important;
-        page-break-after: always;
-        page-break-inside: avoid;
+        width: 33mm !important; height: 21mm !important; box-shadow: none !important; border-radius: 0 !important;
+        padding: 1.5mm 1mm 1mm 1mm !important; page-break-after: always; page-break-inside: avoid;
+        justify-content: flex-start !important; align-items: center !important;
       }
 
-      .bopp-label-preview #qrcode-container {
-        width: 15mm !important;
-        height: 15mm !important;
-      }
-
-      .bopp-label-preview .label-code {
-        font-size: 5pt !important;
-        margin-top: 0.5mm !important;
-        max-width: 31mm !important;
-      }
-
-      .bopp-label-preview .label-subtext {
-        font-size: 4pt !important;
-      }
+      .bopp-label-preview #qrcode-container { width: 13.5mm !important; height: 13.5mm !important; padding: 0 !important; }
+      .bopp-label-preview .label-code { font-size: 5pt !important; margin-top: 0.5mm !important; max-width: 31mm !important; }
+      .bopp-label-preview .label-subtext { font-size: 4pt !important; }
     }
   </style>
 </head>
@@ -446,17 +167,14 @@
   </header>
 
   <div class="dashboard-grid">
-    
-    <!-- PAINEL 1: ENTRADA DE DADOS -->
     <div class="panel">
       <div class="panel-title">MATRIZ DE DADOS</div>
-      
-      <div class="spec-badge">ESPECIFICAÇÃO: BOPP 33x21MM | QR ULTRA-LIMPO</div>
+      <div class="spec-badge">ESPECIFICAÇÃO: BOPP 33x21MM | MARGEM AMPLA</div>
 
       <div class="input-group">
         <label for="link-input">URL / LINK DESTINO</label>
         <input type="text" id="link-input" value="https://google.com" placeholder="Cole qualquer link aqui..." oninput="handleInputChange()">
-        <div class="status-text" id="status-msg">● Link Curto Otimizado</div>
+        <div class="status-text" id="status-msg">● Link Otimizado</div>
       </div>
 
       <div class="input-group">
@@ -470,30 +188,25 @@
       </div>
 
       <div class="btn-group">
-        <button class="btn btn-primary" onclick="window.print()">
-          IMPRIMIR ETIQUETA
-        </button>
-        <button class="btn btn-secondary" onclick="resetForm()">
-          RESTAURAR
-        </button>
+        <button class="btn btn-primary" onclick="window.print()">IMPRIMIR ETIQUETA</button>
+        <button class="btn btn-secondary" onclick="resetForm()">RESTAURAR</button>
       </div>
     </div>
 
-    <!-- PAINEL 2: PRÉ-VISUALIZAÇÃO DE HARDWARE -->
     <div class="panel">
       <div class="panel-title">PRÉ-VISUALIZAÇÃO DE HARDWARE</div>
-
       <div class="preview-stage">
         <div class="label-outer-wrapper">
           <div class="bopp-label-preview" id="printable-label">
             <div id="qrcode-container"></div>
-            <div class="label-code" id="lbl-code">LOTE107-4883</div>
-            <div class="label-subtext" id="lbl-subtext">REF: CX-01</div>
+            <div>
+              <div class="label-code" id="lbl-code">LOTE107-4883</div>
+              <div class="label-subtext" id="lbl-subtext">REF: CX-01</div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-
   </div>
 
   <script>
@@ -501,11 +214,10 @@
     let debounceTimer;
 
     function initQR() {
-      // Define a correção de erro para L (Low) -> Quadradinhos pretos BEM MAIORES e fáceis de ler
       qrcode = new QRCode(document.getElementById("qrcode-container"), {
         text: "https://google.com",
-        width: 150,
-        height: 150,
+        width: 120,
+        height: 120,
         colorDark : "#000000",
         colorLight : "#ffffff",
         correctLevel : QRCode.CorrectLevel.L
@@ -524,18 +236,15 @@
 
     async function processUrl(origUrl) {
       const status = document.getElementById('status-msg');
-
-      // Se o link já for bem curto, gera direto sem precisar chamar API
       if (origUrl.length <= 22) {
         qrcode.makeCode(origUrl);
-        status.innerText = '✔ QR Code gerado (Modo Curto Direct)';
+        status.innerText = '✔ QR Code gerado (Direto)';
         status.style.color = 'var(--green-glow)';
         return;
       }
 
-      // Se for longo, encurta automaticamente via API do TinyURL
       try {
-        status.innerText = '⚡ Encurtando link automaticamente...';
+        status.innerText = '⚡ Encurtando link...';
         const res = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(origUrl)}`);
         if (res.ok) {
           const shortUrl = await res.text();
@@ -548,18 +257,16 @@
         }
       } catch (err) {
         qrcode.makeCode(origUrl);
-        status.innerText = '⚠ Usando link original (offline)';
+        status.innerText = '⚠ Usando link original';
       }
     }
 
     function updateText() {
-      const text = document.getElementById('code-input').value;
-      document.getElementById('lbl-code').innerText = text || ' ';
+      document.getElementById('lbl-code').innerText = document.getElementById('code-input').value || ' ';
     }
 
     function updateSubtext() {
-      const subtext = document.getElementById('subtext-input').value;
-      document.getElementById('lbl-subtext').innerText = subtext || ' ';
+      document.getElementById('lbl-subtext').innerText = document.getElementById('subtext-input').value || ' ';
     }
 
     function resetForm() {
@@ -573,6 +280,5 @@
 
     window.onload = initQR;
   </script>
-
 </body>
 </html>
