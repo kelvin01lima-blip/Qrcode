@@ -38,25 +38,16 @@
     }
 
     header {
-      width: 100%;
-      max-width: 1100px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 15px 25px;
-      margin-bottom: 25px;
-      background: var(--panel-bg);
-      border: 1px solid var(--border-color);
-      box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);
+      width: 100%; max-width: 1100px; display: flex; justify-content: space-between; align-items: center;
+      padding: 15px 25px; margin-bottom: 25px; background: var(--panel-bg);
+      border: 1px solid var(--border-color); box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);
       clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
     }
 
     .brand { display: flex; align-items: center; gap: 12px; }
     .brand-icon {
-      width: 32px; height: 32px; border: 2px solid var(--cyan-glow);
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 0 10px var(--cyan-glow);
-      clip-path: polygon(20% 0, 100% 0, 100% 80%, 80% 100%, 0 100%, 0 20%);
+      width: 32px; height: 32px; border: 2px solid var(--cyan-glow); display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 10px var(--cyan-glow); clip-path: polygon(20% 0, 100% 0, 100% 80%, 80% 100%, 0 100%, 0 20%);
     }
     .brand-icon::after { content: ''; width: 12px; height: 12px; background: var(--cyan-glow); }
 
@@ -167,7 +158,7 @@
 
       <div class="input-group">
         <label for="link-input">URL / LINK DESTINO</label>
-        <input type="text" id="link-input" value="https://google.com" placeholder="Cole qualquer link aqui..." oninput="updateAll()">
+        <input type="text" id="link-input" value="https://google.com" placeholder="Cole o link da planilha aqui..." oninput="updateAll()">
       </div>
 
       <div class="input-group">
@@ -204,12 +195,22 @@
 
   <script>
     function updateAll() {
-      let link = document.getElementById('link-input').value.trim();
-      if (!link) link = "https://google.com";
+      let rawLink = document.getElementById('link-input').value.trim();
+      if (!rawLink) rawLink = "https://google.com";
 
-      // Usa o gerador da api.qrserver.com com margem (margin=1) e correção de erro L (Low)
-      // Isso GERA UM QR CODE COM QUADRADOS BEM MAIORES, sem travar no GitHub
-      const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&margin=1&ecc=L&data=${encodeURIComponent(link)}`;
+      let cleanLink = rawLink;
+
+      // Se for um link do Google Sheets, extrai APENAS a ID única da planilha
+      if (rawLink.includes("docs.google.com/spreadsheets/d/")) {
+        const match = rawLink.match(/\/d\/([a-zA-Z0-9-_]+)/);
+        if (match && match[1]) {
+          // Converte para o link oficial ultra-curto do Google Drive
+          cleanLink = "https://docs.google.com/spreadsheets/d/" + match[1];
+        }
+      }
+
+      // Gera o QR Code otimizado
+      const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&margin=1&ecc=L&data=${encodeURIComponent(cleanLink)}`;
       
       document.getElementById('qr-img').src = qrApiUrl;
       document.getElementById('lbl-code').innerText = document.getElementById('code-input').value || ' ';
