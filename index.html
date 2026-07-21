@@ -2,11 +2,10 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>CyberQR - Encurtador & Gerador de Etiquetas 33x21mm</title>
+  <title>CyberQR - Gerador de Etiquetas 33x21mm</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     :root {
       --bg-dark: #080b10;
@@ -91,7 +90,6 @@
     input[type="text"]:focus { border-color: var(--cyan-glow); box-shadow: 0 0 10px rgba(0, 240, 255, 0.3); }
 
     .spec-badge { display: inline-block; padding: 4px 10px; background: rgba(0, 240, 255, 0.1); border: 1px solid var(--cyan-glow); color: var(--cyan-glow); font-family: 'Orbitron', sans-serif; font-size: 0.75rem; margin-bottom: 15px; }
-    .status-text { font-size: 0.8rem; color: var(--cyan-glow); margin-top: 5px; min-height: 18px; }
 
     .btn-group { display: flex; gap: 12px; margin-top: 25px; }
     .btn {
@@ -108,25 +106,21 @@
     .label-outer-wrapper { position: relative; padding: 10px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 4px; }
     .label-outer-wrapper::after { content: 'ESCALA VIRTUAL 1:1 (33x21mm)'; position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%); font-size: 0.65rem; font-family: 'Orbitron', sans-serif; color: var(--text-dim); white-space: nowrap; }
 
-    /* ETIQUETA COM MARGEM DE SEGURANÇA (QUIET ZONE) */
+    /* LAYOUT DA ETIQUETA */
     .bopp-label-preview {
       width: 165px; height: 105px; background: #ffffff; border-radius: 2px;
-      display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-      padding: 6px 4px 4px 4px; color: #000; box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+      display: flex; flex-direction: column; align-items: center; justify-content: space-around;
+      padding: 4px; color: #000; box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
       position: relative; overflow: hidden;
     }
 
-    .bopp-label-preview #qrcode-container {
-      width: 65px; height: 65px; display: flex; align-items: center; justify-content: center;
-      background: #fff; padding: 2px; /* Força margem branca ao redor */
+    .bopp-label-preview img#qr-img {
+      width: 65px; height: 65px; object-fit: contain;
     }
-
-    .bopp-label-preview #qrcode-container img { width: 100% !important; height: 100% !important; image-rendering: pixelated; }
 
     .bopp-label-preview .label-code {
       font-family: Arial, sans-serif; font-size: 8px; font-weight: bold; color: #000;
       text-align: center; max-width: 155px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      margin-top: 1px;
     }
 
     .bopp-label-preview .label-subtext { font-family: Arial, sans-serif; font-size: 6px; color: #333; text-align: center; }
@@ -135,7 +129,7 @@
       @page { size: 33mm 21mm; margin: 0; }
       *, *::before, *::after { box-shadow: none !important; text-shadow: none !important; }
       body { background: #fff !important; padding: 0 !important; margin: 0 !important; width: 33mm !important; height: 21mm !important; display: block !important; }
-      header, .dashboard-grid > .panel:first-child, .panel-title, .spec-badge, .btn-group, .label-outer-wrapper::after, .status-text { display: none !important; }
+      header, .dashboard-grid > .panel:first-child, .panel-title, .spec-badge, .btn-group, .label-outer-wrapper::after { display: none !important; }
       .dashboard-grid { display: block !important; width: 33mm !important; }
       .panel { border: none !important; background: transparent !important; padding: 0 !important; clip-path: none !important; }
       .preview-stage { background: transparent !important; border: none !important; min-height: 0 !important; padding: 0 !important; }
@@ -143,12 +137,12 @@
 
       .bopp-label-preview {
         width: 33mm !important; height: 21mm !important; box-shadow: none !important; border-radius: 0 !important;
-        padding: 1.5mm 1mm 1mm 1mm !important; page-break-after: always; page-break-inside: avoid;
+        padding: 1mm !important; page-break-after: always; page-break-inside: avoid;
         justify-content: flex-start !important; align-items: center !important;
       }
 
-      .bopp-label-preview #qrcode-container { width: 13.5mm !important; height: 13.5mm !important; padding: 0 !important; }
-      .bopp-label-preview .label-code { font-size: 5pt !important; margin-top: 0.5mm !important; max-width: 31mm !important; }
+      .bopp-label-preview img#qr-img { width: 14mm !important; height: 14mm !important; margin-bottom: 0.5mm; }
+      .bopp-label-preview .label-code { font-size: 5pt !important; max-width: 31mm !important; }
       .bopp-label-preview .label-subtext { font-size: 4pt !important; }
     }
   </style>
@@ -162,29 +156,28 @@
     </div>
     <div class="sys-status">
       <div class="pulse-dot"></div>
-      MODO IMPRESSÃO: BOPP 33x21MM ATIVO
+      MODO IMPRESSÃO: BOPP 33x21MM
     </div>
   </header>
 
   <div class="dashboard-grid">
     <div class="panel">
       <div class="panel-title">MATRIZ DE DADOS</div>
-      <div class="spec-badge">ESPECIFICAÇÃO: BOPP 33x21MM | MARGEM AMPLA</div>
+      <div class="spec-badge">ESPECIFICAÇÃO: BOPP 33x21MM</div>
 
       <div class="input-group">
         <label for="link-input">URL / LINK DESTINO</label>
-        <input type="text" id="link-input" value="https://google.com" placeholder="Cole qualquer link aqui..." oninput="handleInputChange()">
-        <div class="status-text" id="status-msg">● Link Otimizado</div>
+        <input type="text" id="link-input" value="https://google.com" placeholder="Cole qualquer link aqui..." oninput="updateAll()">
       </div>
 
       <div class="input-group">
         <label for="code-input">CÓDIGO / TÍTULO DA ETIQUETA</label>
-        <input type="text" id="code-input" value="LOTE107-4883" placeholder="Ex: LOTE107-4883" oninput="updateText()">
+        <input type="text" id="code-input" value="LOTE107-4883" placeholder="Ex: LOTE107-4883" oninput="updateAll()">
       </div>
 
       <div class="input-group">
         <label for="subtext-input">SUB-TEXTO / SKU (OPCIONAL)</label>
-        <input type="text" id="subtext-input" value="REF: CX-01" placeholder="Ex: REF: CX-01" oninput="updateSubtext()">
+        <input type="text" id="subtext-input" value="REF: CX-01" placeholder="Ex: REF: CX-01" oninput="updateAll()">
       </div>
 
       <div class="btn-group">
@@ -198,7 +191,7 @@
       <div class="preview-stage">
         <div class="label-outer-wrapper">
           <div class="bopp-label-preview" id="printable-label">
-            <div id="qrcode-container"></div>
+            <img id="qr-img" src="" alt="QR Code">
             <div>
               <div class="label-code" id="lbl-code">LOTE107-4883</div>
               <div class="label-subtext" id="lbl-subtext">REF: CX-01</div>
@@ -210,62 +203,16 @@
   </div>
 
   <script>
-    let qrcode;
-    let debounceTimer;
+    function updateAll() {
+      let link = document.getElementById('link-input').value.trim();
+      if (!link) link = "https://google.com";
 
-    function initQR() {
-      qrcode = new QRCode(document.getElementById("qrcode-container"), {
-        text: "https://google.com",
-        width: 120,
-        height: 120,
-        colorDark : "#000000",
-        colorLight : "#ffffff",
-        correctLevel : QRCode.CorrectLevel.L
-      });
-      processUrl("https://google.com");
-    }
-
-    function handleInputChange() {
-      clearTimeout(debounceTimer);
-      document.getElementById('status-msg').innerText = '⌛ Processando link...';
-      debounceTimer = setTimeout(() => {
-        const url = document.getElementById('link-input').value.trim();
-        if (url) processUrl(url);
-      }, 600);
-    }
-
-    async function processUrl(origUrl) {
-      const status = document.getElementById('status-msg');
-      if (origUrl.length <= 22) {
-        qrcode.makeCode(origUrl);
-        status.innerText = '✔ QR Code gerado (Direto)';
-        status.style.color = 'var(--green-glow)';
-        return;
-      }
-
-      try {
-        status.innerText = '⚡ Encurtando link...';
-        const res = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(origUrl)}`);
-        if (res.ok) {
-          const shortUrl = await res.text();
-          qrcode.makeCode(shortUrl);
-          status.innerText = `✔ Link encurtado: ${shortUrl}`;
-          status.style.color = 'var(--cyan-glow)';
-        } else {
-          qrcode.makeCode(origUrl);
-          status.innerText = '⚠ Usando link original';
-        }
-      } catch (err) {
-        qrcode.makeCode(origUrl);
-        status.innerText = '⚠ Usando link original';
-      }
-    }
-
-    function updateText() {
+      // Usa o gerador da api.qrserver.com com margem (margin=1) e correção de erro L (Low)
+      // Isso GERA UM QR CODE COM QUADRADOS BEM MAIORES, sem travar no GitHub
+      const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&margin=1&ecc=L&data=${encodeURIComponent(link)}`;
+      
+      document.getElementById('qr-img').src = qrApiUrl;
       document.getElementById('lbl-code').innerText = document.getElementById('code-input').value || ' ';
-    }
-
-    function updateSubtext() {
       document.getElementById('lbl-subtext').innerText = document.getElementById('subtext-input').value || ' ';
     }
 
@@ -273,12 +220,10 @@
       document.getElementById('link-input').value = 'https://google.com';
       document.getElementById('code-input').value = 'LOTE107-4883';
       document.getElementById('subtext-input').value = 'REF: CX-01';
-      processUrl('https://google.com');
-      updateText();
-      updateSubtext();
+      updateAll();
     }
 
-    window.onload = initQR;
+    window.onload = updateAll;
   </script>
 </body>
 </html>
