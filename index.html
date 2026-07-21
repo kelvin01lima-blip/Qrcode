@@ -199,9 +199,9 @@
     let timer;
 
     function debounceUpdate() {
-      document.getElementById('status-text').innerText = "STATUS: GERANDO QR CODE...";
+      document.getElementById('status-text').innerText = "STATUS: ENCURTANDO LINK...";
       clearTimeout(timer);
-      timer = setTimeout(generateQR, 300);
+      timer = setTimeout(generateQR, 600);
     }
 
     function updateLabelsOnly() {
@@ -209,24 +209,40 @@
       document.getElementById('lbl-subtext').innerText = document.getElementById('subtext-input').value || ' ';
     }
 
-    function generateQR() {
+    async function generateQR() {
       let rawLink = document.getElementById('link-input').value.trim();
       if (!rawLink) rawLink = "https://google.com";
 
-      let finalUrl = rawLink;
+      let targetUrl = rawLink;
 
-      // Converte link de planilha do Google para exibição direta focada em intervalo
+      // Trata link do Google Sheets para focar nas colunas do layout limpo
       if (rawLink.includes("docs.google.com/spreadsheets/d/")) {
         const match = rawLink.match(/\/d\/([a-zA-Z0-9-_]+)/);
         if (match && match[1]) {
-          finalUrl = `https://docs.google.com/spreadsheets/d/${match[1]}/htmlview?gid=0&range=I1:N35`;
-          document.getElementById('status-text').innerText = "STATUS: LINK DE VISUALIZAÇÃO FORMATADO!";
+          targetUrl = `https://docs.google.com/spreadsheets/d/${match[1]}/htmlview?gid=0&range=I1:N35`;
         }
-      } else {
-        document.getElementById('status-text').innerText = "STATUS: QR CODE PRONTO";
       }
 
-      // Gera a imagem do QR Code diretamente sem bloqueios de CORS
+      let finalUrl = targetUrl;
+
+      // Se a URL for maior que 30 caracteres, encurta automaticamente via Is.gd + Proxy
+      if (targetUrl.length > 30) {
+        try {
+          const proxyUrl = `https://corsproxy.io/?${encodeURIComponent('https://is.gd/create.php?format=json&url=' + encodeURIComponent(targetUrl))}`;
+          const response = await fetch(proxyUrl);
+          const data = await response.json();
+          if (data.shorturl) {
+            finalUrl = data.shorturl;
+            document.getElementById('status-text').innerText = "STATUS: LINK ENCURTADO E OTIMIZADO!";
+          }
+        } catch (e) {
+          document.getElementById('status-text').innerText = "STATUS: ERRO AO ENCURTAR (USANDO DIRECTO)";
+        }
+      } else {
+        document.getElementById('status-text').innerText = "STATUS: QR CODE PRONTO!";
+      }
+
+      // Desenha o QR Code leve e simplificado
       const qrImageSrc = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&margin=1&ecc=L&data=${encodeURIComponent(finalUrl)}`;
       document.getElementById('qr-img').src = qrImageSrc;
       
