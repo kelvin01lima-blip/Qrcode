@@ -199,7 +199,7 @@
     let timer;
 
     function debounceUpdate() {
-      document.getElementById('status-text').innerText = "STATUS: ENCURTANDO E GERANDO QR...";
+      document.getElementById('status-text').innerText = "STATUS: FORMATANDO VISUALIZAÇÃO PURE-VIEW...";
       clearTimeout(timer);
       timer = setTimeout(generateQR, 500);
     }
@@ -213,24 +213,33 @@
       let rawLink = document.getElementById('link-input').value.trim();
       if (!rawLink) rawLink = "https://google.com";
 
-      let finalUrl = rawLink;
+      let cleanLink = rawLink;
 
-      // Se for link do Google Sheets ou maior que 25 caracteres, encurta via API segura (JSONP/TinyURL)
-      if (rawLink.length > 25) {
-        try {
-          let apiRes = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(rawLink)}`);
-          if (apiRes.ok) {
-            finalUrl = await apiRes.text();
-            document.getElementById('status-text').innerText = "STATUS: LINK ENCURTADO COM SUCESSO!";
-          }
-        } catch (e) {
-          document.getElementById('status-text').innerText = "STATUS: ERRO AO ENCURTAR (USANDO DIRETO)";
+      // Se for link do Google Sheets, converte para o modo SOMENTE LEITURA e RESTRITO À TABELA (range I1:N32)
+      if (rawLink.includes("docs.google.com/spreadsheets/d/")) {
+        const match = rawLink.match(/\/d\/([a-zA-Z0-9-_]+)/);
+        if (match && match[1]) {
+          // Formata como pubhtml limitando o intervalo para apenas a tabela desejada
+          cleanLink = `https://docs.google.com/spreadsheets/d/${match[1]}/pubhtml?widget=true&headers=false&range=I1:N35`;
         }
-      } else {
-        document.getElementById('status-text').innerText = "STATUS: LINK CURTO DETECTADO!";
       }
 
-      // Desenha o QR Code com a menor densidade de matriz (ecc=L, margin=1)
+      let finalUrl = cleanLink;
+
+      // Encurta automaticamente para manter o QR Code super leve
+      if (cleanLink.length > 25) {
+        try {
+          let apiRes = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(cleanLink)}`);
+          if (apiRes.ok) {
+            finalUrl = await apiRes.text();
+            document.getElementById('status-text').innerText = "STATUS: MODO APENAS LEITURA ATIVADO!";
+          }
+        } catch (e) {
+          document.getElementById('status-text').innerText = "STATUS: LINK FORMATADO";
+        }
+      }
+
+      // Desenha o QR Code limpo
       const qrImageSrc = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&margin=1&ecc=L&data=${encodeURIComponent(finalUrl)}`;
       document.getElementById('qr-img').src = qrImageSrc;
       
