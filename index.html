@@ -2,12 +2,12 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>CyberQR - Futurist Label Dashboard</title>
-  <!-- Google Fonts for futuristic look -->
+  <title>CyberQR - Encurtador & Gerador de Etiquetas 33x21mm</title>
+  <!-- Google Fonts futuristas -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-  <!-- Gerador de QR Code em Javascript -->
+  <!-- Gerador de QR Code JS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     :root {
@@ -122,7 +122,7 @@
       100% { opacity: 0.3; transform: scale(0.8); }
     }
 
-    /* Layout Grid */
+    /* Grid do Dashboard */
     .dashboard-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -212,6 +212,13 @@
       margin-bottom: 15px;
     }
 
+    .status-text {
+      font-size: 0.8rem;
+      color: var(--cyan-glow);
+      margin-top: 5px;
+      min-height: 18px;
+    }
+
     /* Botões */
     .btn-group {
       display: flex;
@@ -299,8 +306,8 @@
 
     /* Modelo de Etiqueta BOPP Realista no Navegador */
     .bopp-label-preview {
-      width: 165px; /* Proporção 33mm em tela */
-      height: 105px; /* Proporção 21mm em tela */
+      width: 165px; /* Proporção 33mm */
+      height: 105px; /* Proporção 21mm */
       background: #ffffff;
       border-radius: 2px;
       display: flex;
@@ -315,8 +322,8 @@
     }
 
     .bopp-label-preview #qrcode-container {
-      width: 70px;
-      height: 70px;
+      width: 72px;
+      height: 72px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -325,6 +332,7 @@
     .bopp-label-preview #qrcode-container img {
       width: 100% !important;
       height: 100% !important;
+      image-rendering: pixelated;
     }
 
     .bopp-label-preview .label-code {
@@ -347,7 +355,7 @@
       text-align: center;
     }
 
-    /* REGRAS DE IMPRESSÃO (REMOVE O DASHBOARD E DEIXA SÓ A ETIQUETA) */
+    /* REGRAS DE IMPRESSÃO (REMOVE O DASHBOARD E IMPRIME APENAS A ETIQUETA) */
     @media print {
       @page {
         size: 33mm 21mm;
@@ -368,7 +376,7 @@
         display: block !important;
       }
 
-      header, .dashboard-grid > .panel:first-child, .panel-title, .spec-badge, .btn-group, .label-outer-wrapper::after {
+      header, .dashboard-grid > .panel:first-child, .panel-title, .spec-badge, .btn-group, .label-outer-wrapper::after, .status-text {
         display: none !important;
       }
 
@@ -443,21 +451,22 @@
     <div class="panel">
       <div class="panel-title">MATRIZ DE DADOS</div>
       
-      <div class="spec-badge">ESPECIFICAÇÃO: ETIQUETA BOPP 33x21MM (GAP)</div>
+      <div class="spec-badge">ESPECIFICAÇÃO: BOPP 33x21MM | QR ULTRA-LIMPO</div>
 
       <div class="input-group">
         <label for="link-input">URL / LINK DESTINO</label>
-        <input type="text" id="link-input" value="https://produto.exemplo.com/lote-9021" placeholder="Cole o link aqui..." oninput="updateQR()">
+        <input type="text" id="link-input" value="https://google.com" placeholder="Cole qualquer link aqui..." oninput="handleInputChange()">
+        <div class="status-text" id="status-msg">● Link Curto Otimizado</div>
       </div>
 
       <div class="input-group">
         <label for="code-input">CÓDIGO / TÍTULO DA ETIQUETA</label>
-        <input type="text" id="code-input" value="LOTE-9021-BOPP" placeholder="Ex: COD-12345" oninput="updateText()">
+        <input type="text" id="code-input" value="LOTE107-4883" placeholder="Ex: LOTE107-4883" oninput="updateText()">
       </div>
 
       <div class="input-group">
         <label for="subtext-input">SUB-TEXTO / SKU (OPCIONAL)</label>
-        <input type="text" id="subtext-input" value="REF: CX-01 | IMPRESSÃO TÉRMICA" placeholder="Ex: REF: 90021" oninput="updateSubtext()">
+        <input type="text" id="subtext-input" value="REF: CX-01" placeholder="Ex: REF: CX-01" oninput="updateSubtext()">
       </div>
 
       <div class="btn-group">
@@ -478,8 +487,8 @@
         <div class="label-outer-wrapper">
           <div class="bopp-label-preview" id="printable-label">
             <div id="qrcode-container"></div>
-            <div class="label-code" id="lbl-code">LOTE-9021-BOPP</div>
-            <div class="label-subtext" id="lbl-subtext">REF: CX-01 | IMPRESSÃO TÉRMICA</div>
+            <div class="label-code" id="lbl-code">LOTE107-4883</div>
+            <div class="label-subtext" id="lbl-subtext">REF: CX-01</div>
           </div>
         </div>
       </div>
@@ -489,23 +498,57 @@
 
   <script>
     let qrcode;
+    let debounceTimer;
 
     function initQR() {
-      const link = document.getElementById('link-input').value;
+      // Define a correção de erro para L (Low) -> Quadradinhos pretos BEM MAIORES e fáceis de ler
       qrcode = new QRCode(document.getElementById("qrcode-container"), {
-        text: link,
+        text: "https://google.com",
         width: 150,
         height: 150,
         colorDark : "#000000",
         colorLight : "#ffffff",
-        correctLevel : QRCode.CorrectLevel.M
+        correctLevel : QRCode.CorrectLevel.L
       });
+      processUrl("https://google.com");
     }
 
-    function updateQR() {
-      const link = document.getElementById('link-input').value;
-      if (qrcode && link.trim() !== '') {
-        qrcode.makeCode(link);
+    function handleInputChange() {
+      clearTimeout(debounceTimer);
+      document.getElementById('status-msg').innerText = '⌛ Processando link...';
+      debounceTimer = setTimeout(() => {
+        const url = document.getElementById('link-input').value.trim();
+        if (url) processUrl(url);
+      }, 600);
+    }
+
+    async function processUrl(origUrl) {
+      const status = document.getElementById('status-msg');
+
+      // Se o link já for bem curto, gera direto sem precisar chamar API
+      if (origUrl.length <= 22) {
+        qrcode.makeCode(origUrl);
+        status.innerText = '✔ QR Code gerado (Modo Curto Direct)';
+        status.style.color = 'var(--green-glow)';
+        return;
+      }
+
+      // Se for longo, encurta automaticamente via API do TinyURL
+      try {
+        status.innerText = '⚡ Encurtando link automaticamente...';
+        const res = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(origUrl)}`);
+        if (res.ok) {
+          const shortUrl = await res.text();
+          qrcode.makeCode(shortUrl);
+          status.innerText = `✔ Link encurtado: ${shortUrl}`;
+          status.style.color = 'var(--cyan-glow)';
+        } else {
+          qrcode.makeCode(origUrl);
+          status.innerText = '⚠ Usando link original';
+        }
+      } catch (err) {
+        qrcode.makeCode(origUrl);
+        status.innerText = '⚠ Usando link original (offline)';
       }
     }
 
@@ -520,10 +563,10 @@
     }
 
     function resetForm() {
-      document.getElementById('link-input').value = 'https://produto.exemplo.com/lote-9021';
-      document.getElementById('code-input').value = 'LOTE-9021-BOPP';
-      document.getElementById('subtext-input').value = 'REF: CX-01 | IMPRESSÃO TÉRMICA';
-      updateQR();
+      document.getElementById('link-input').value = 'https://google.com';
+      document.getElementById('code-input').value = 'LOTE107-4883';
+      document.getElementById('subtext-input').value = 'REF: CX-01';
+      processUrl('https://google.com');
       updateText();
       updateSubtext();
     }
