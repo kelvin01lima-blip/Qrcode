@@ -81,7 +81,7 @@
     input[type="text"]:focus { border-color: var(--cyan-glow); box-shadow: 0 0 10px rgba(0, 240, 255, 0.3); }
 
     .spec-badge { display: inline-block; padding: 4px 10px; background: rgba(0, 240, 255, 0.1); border: 1px solid var(--cyan-glow); color: var(--cyan-glow); font-family: 'Orbitron', sans-serif; font-size: 0.75rem; margin-bottom: 15px; }
-    .status-info { font-size: 0.75rem; color: var(--cyan-glow); margin-top: 5px; }
+    .status-info { font-size: 0.75rem; color: var(--cyan-glow); margin-top: 5px; font-weight: bold; }
 
     .btn-group { display: flex; gap: 12px; margin-top: 25px; }
     .btn {
@@ -201,7 +201,7 @@
     function debounceUpdate() {
       document.getElementById('status-text').innerText = "STATUS: ENCURTANDO LINK...";
       clearTimeout(timer);
-      timer = setTimeout(generateQR, 600);
+      timer = setTimeout(generateQR, 500);
     }
 
     function updateLabelsOnly() {
@@ -209,41 +209,65 @@
       document.getElementById('lbl-subtext').innerText = document.getElementById('subtext-input').value || ' ';
     }
 
+    // Encurtador resiliente com Fallback múltiplo
+    async function shortenUrl(url) {
+      // Método 1: TinyURL API direta (Sem CORS/Rate Limit rígido)
+      try {
+        const res = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(url)}`);
+        if (res.ok) {
+          const short = await res.text();
+          if (short && short.startsWith('http')) return short;
+        }
+      } catch (e) {}
+
+      // Método 2: Is.gd via proxy alternativo
+      try {
+        const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://is.gd/create.php?format=json&url=' + encodeURIComponent(url))}`);
+        if (res.ok) {
+          const data = await res.json();
+          const parsed = JSON.parse(data.contents);
+          if (parsed.shorturl) return parsed.shorturl;
+        }
+      } catch (e) {}
+
+      return null;
+    }
+
     async function generateQR() {
       let rawLink = document.getElementById('link-input').value.trim();
       if (!rawLink) rawLink = "https://google.com";
 
-      let targetUrl = rawLink;
+      let cleanLink = rawLink;
 
-      // Trata link do Google Sheets para focar nas colunas do layout limpo
+      // Otimização de link do Google Sheets
       if (rawLink.includes("docs.google.com/spreadsheets/d/")) {
         const match = rawLink.match(/\/d\/([a-zA-Z0-9-_]+)/);
         if (match && match[1]) {
-          targetUrl = `https://docs.google.com/spreadsheets/d/${match[1]}/htmlview?gid=0&range=I1:N35`;
+          cleanLink = `https://docs.google.com/spreadsheets/d/${match[1]}`;
         }
       }
 
-      let finalUrl = targetUrl;
+      let finalUrl = cleanLink;
 
-      // Se a URL for maior que 30 caracteres, encurta automaticamente via Is.gd + Proxy
-      if (targetUrl.length > 30) {
-        try {
-          const proxyUrl = `https://corsproxy.io/?${encodeURIComponent('https://is.gd/create.php?format=json&url=' + encodeURIComponent(targetUrl))}`;
-          const response = await fetch(proxyUrl);
-          const data = await response.json();
-          if (data.shorturl) {
-            finalUrl = data.shorturl;
-            document.getElementById('status-text').innerText = "STATUS: LINK ENCURTADO E OTIMIZADO!";
-          }
-        } catch (e) {
-          document.getElementById('status-text').innerText = "STATUS: ERRO AO ENCURTAR (USANDO DIRECTO)";
+      if (cleanLink.length > 25) {
+        document.getElementById('status-text').innerText = "STATUS: ENCURTANDO LINK...";
+        const shortened = await shortenUrl(cleanLink);
+        
+        if (shortened) {
+          finalUrl = shortened;
+          document.getElementById('status-text').innerText = "STATUS: OK! (LINK ENCURTADO)";
+          document.getElementById('status-text').style.color = "#00ff66";
+        } else {
+          document.getElementById('status-text').innerText = "STATUS: USANDO LINK OTIMIZADO DENSIDADE MÉDIA";
+          document.getElementById('status-text').style.color = "#ffaa00";
         }
       } else {
         document.getElementById('status-text').innerText = "STATUS: QR CODE PRONTO!";
+        document.getElementById('status-text').style.color = "#00f0ff";
       }
 
-      // Desenha o QR Code leve e simplificado
-      const qrImageSrc = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&margin=1&ecc=L&data=${encodeURIComponent(finalUrl)}`;
+      // QR Code otimizado para etiquetas pequenas (ecc=L deixa os quadrados maiores)
+      const qrImageSrc = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&margin=0&ecc=L&data=${encodeURIComponent(finalUrl)}`;
       document.getElementById('qr-img').src = qrImageSrc;
       
       updateLabelsOnly();
