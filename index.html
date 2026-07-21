@@ -81,6 +81,7 @@
     input[type="text"]:focus { border-color: var(--cyan-glow); box-shadow: 0 0 10px rgba(0, 240, 255, 0.3); }
 
     .spec-badge { display: inline-block; padding: 4px 10px; background: rgba(0, 240, 255, 0.1); border: 1px solid var(--cyan-glow); color: var(--cyan-glow); font-family: 'Orbitron', sans-serif; font-size: 0.75rem; margin-bottom: 15px; }
+    .status-info { font-size: 0.75rem; color: var(--cyan-glow); margin-top: 5px; }
 
     .btn-group { display: flex; gap: 12px; margin-top: 25px; }
     .btn {
@@ -97,7 +98,7 @@
     .label-outer-wrapper { position: relative; padding: 10px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 4px; }
     .label-outer-wrapper::after { content: 'ESCALA VIRTUAL 1:1 (33x21mm)'; position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%); font-size: 0.65rem; font-family: 'Orbitron', sans-serif; color: var(--text-dim); white-space: nowrap; }
 
-    /* LAYOUT DA ETIQUETA */
+    /* ETIQUETA */
     .bopp-label-preview {
       width: 165px; height: 105px; background: #ffffff; border-radius: 2px;
       display: flex; flex-direction: column; align-items: center; justify-content: space-around;
@@ -120,7 +121,7 @@
       @page { size: 33mm 21mm; margin: 0; }
       *, *::before, *::after { box-shadow: none !important; text-shadow: none !important; }
       body { background: #fff !important; padding: 0 !important; margin: 0 !important; width: 33mm !important; height: 21mm !important; display: block !important; }
-      header, .dashboard-grid > .panel:first-child, .panel-title, .spec-badge, .btn-group, .label-outer-wrapper::after { display: none !important; }
+      header, .dashboard-grid > .panel:first-child, .panel-title, .spec-badge, .btn-group, .label-outer-wrapper::after, .status-info { display: none !important; }
       .dashboard-grid { display: block !important; width: 33mm !important; }
       .panel { border: none !important; background: transparent !important; padding: 0 !important; clip-path: none !important; }
       .preview-stage { background: transparent !important; border: none !important; min-height: 0 !important; padding: 0 !important; }
@@ -158,17 +159,18 @@
 
       <div class="input-group">
         <label for="link-input">URL / LINK DESTINO</label>
-        <input type="text" id="link-input" value="https://google.com" placeholder="Cole o link da planilha aqui..." oninput="updateAll()">
+        <input type="text" id="link-input" value="https://google.com" placeholder="Cole o link da planilha aqui..." oninput="debounceUpdate()">
+        <div class="status-info" id="status-text">STATUS: AGUARDANDO LINK...</div>
       </div>
 
       <div class="input-group">
         <label for="code-input">CÓDIGO / TÍTULO DA ETIQUETA</label>
-        <input type="text" id="code-input" value="LOTE107-4883" placeholder="Ex: LOTE107-4883" oninput="updateAll()">
+        <input type="text" id="code-input" value="LOTE107-4883" placeholder="Ex: LOTE107-4883" oninput="updateLabelsOnly()">
       </div>
 
       <div class="input-group">
         <label for="subtext-input">SUB-TEXTO / SKU (OPCIONAL)</label>
-        <input type="text" id="subtext-input" value="REF: CX-01" placeholder="Ex: REF: CX-01" oninput="updateAll()">
+        <input type="text" id="subtext-input" value="REF: CX-01" placeholder="Ex: REF: CX-01" oninput="updateLabelsOnly()">
       </div>
 
       <div class="btn-group">
@@ -194,37 +196,55 @@
   </div>
 
   <script>
-    function updateAll() {
+    let timer;
+
+    function debounceUpdate() {
+      document.getElementById('status-text').innerText = "STATUS: ENCURTANDO E GERANDO QR...";
+      clearTimeout(timer);
+      timer = setTimeout(generateQR, 500);
+    }
+
+    function updateLabelsOnly() {
+      document.getElementById('lbl-code').innerText = document.getElementById('code-input').value || ' ';
+      document.getElementById('lbl-subtext').innerText = document.getElementById('subtext-input').value || ' ';
+    }
+
+    async function generateQR() {
       let rawLink = document.getElementById('link-input').value.trim();
       if (!rawLink) rawLink = "https://google.com";
 
-      let cleanLink = rawLink;
+      let finalUrl = rawLink;
 
-      // Se for um link do Google Sheets, extrai APENAS a ID única da planilha
-      if (rawLink.includes("docs.google.com/spreadsheets/d/")) {
-        const match = rawLink.match(/\/d\/([a-zA-Z0-9-_]+)/);
-        if (match && match[1]) {
-          // Converte para o link oficial ultra-curto do Google Drive
-          cleanLink = "https://docs.google.com/spreadsheets/d/" + match[1];
+      // Se for link do Google Sheets ou maior que 25 caracteres, encurta via API segura (JSONP/TinyURL)
+      if (rawLink.length > 25) {
+        try {
+          let apiRes = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(rawLink)}`);
+          if (apiRes.ok) {
+            finalUrl = await apiRes.text();
+            document.getElementById('status-text').innerText = "STATUS: LINK ENCURTADO COM SUCESSO!";
+          }
+        } catch (e) {
+          document.getElementById('status-text').innerText = "STATUS: ERRO AO ENCURTAR (USANDO DIRETO)";
         }
+      } else {
+        document.getElementById('status-text').innerText = "STATUS: LINK CURTO DETECTADO!";
       }
 
-      // Gera o QR Code otimizado
-      const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&margin=1&ecc=L&data=${encodeURIComponent(cleanLink)}`;
+      // Desenha o QR Code com a menor densidade de matriz (ecc=L, margin=1)
+      const qrImageSrc = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&margin=1&ecc=L&data=${encodeURIComponent(finalUrl)}`;
+      document.getElementById('qr-img').src = qrImageSrc;
       
-      document.getElementById('qr-img').src = qrApiUrl;
-      document.getElementById('lbl-code').innerText = document.getElementById('code-input').value || ' ';
-      document.getElementById('lbl-subtext').innerText = document.getElementById('subtext-input').value || ' ';
+      updateLabelsOnly();
     }
 
     function resetForm() {
       document.getElementById('link-input').value = 'https://google.com';
       document.getElementById('code-input').value = 'LOTE107-4883';
       document.getElementById('subtext-input').value = 'REF: CX-01';
-      updateAll();
+      generateQR();
     }
 
-    window.onload = updateAll;
+    window.onload = generateQR;
   </script>
 </body>
 </html>
