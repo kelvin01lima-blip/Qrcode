@@ -151,7 +151,7 @@
 
       <div class="input-group">
         <label for="link-input">URL / LINK DA PLANILHA NO DRIVE</label>
-        <input type="text" id="link-input" value="" placeholder="Cole o link de qualquer planilha aqui..." oninput="debounceUpdate()">
+        <input type="text" id="link-input" value="" placeholder="Cole o link da planilha aqui..." oninput="generateQR()">
         <div class="status-info" id="status-text">STATUS: COLE O LINK DA PLANILHA...</div>
       </div>
 
@@ -188,24 +188,15 @@
   </div>
 
   <script>
-    let timer;
-
-    function debounceUpdate() {
-      document.getElementById('status-text').innerText = "STATUS: PROCESSANDO LINK...";
-      clearTimeout(timer);
-      timer = setTimeout(generateQR, 500);
-    }
-
     function updateLabelsOnly() {
       document.getElementById('lbl-code').innerText = document.getElementById('code-input').value || ' ';
       document.getElementById('lbl-subtext').innerText = document.getElementById('subtext-input').value || ' ';
     }
 
-    async function generateQR() {
+    function generateQR() {
       let rawLink = document.getElementById('link-input').value.trim();
       let targetUrl = rawLink;
 
-      // Converte para a visão limpa em HTML puro sem menus
       if (rawLink.includes("docs.google.com/spreadsheets/d/")) {
         const match = rawLink.match(/\/d\/([a-zA-Z0-9-_]+)/);
         if (match && match[1]) {
@@ -213,11 +204,12 @@
         }
       }
 
-      document.getElementById('status-text').innerText = "STATUS: QR CODE PRONTO PARA IMPRESSÃO!";
-      document.getElementById('status-text').style.color = "#00ff66";
+      if (targetUrl) {
+        document.getElementById('status-text').innerText = "STATUS: OK! QR CODE DIRETO PRONTO!";
+        document.getElementById('status-text').style.color = "#00ff66";
+      }
 
-      // Gera QR Code direto na alta densidade funcional sem tela intermediária do TinyURL
-      const qrImageSrc = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&margin=0&ecc=L&data=${encodeURIComponent(targetUrl)}`;
+      const qrImageSrc = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&margin=0&ecc=L&data=${encodeURIComponent(targetUrl || 'S.O.S')}`;
       document.getElementById('qr-img').src = qrImageSrc;
       
       updateLabelsOnly();
