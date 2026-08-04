@@ -74,7 +74,7 @@
 
   <header>
     <h1>CYBER<span>QR</span> // OS</h1>
-    <div style="color: var(--green-glow); font-size: 0.8rem; font-family: 'Orbitron';">SISTEMA PRONTO</div>
+    <div style="color: var(--green-glow); font-size: 0.8rem; font-family: 'Orbitron';">SISTEMA ATIVO</div>
   </header>
 
   <div class="grid">
@@ -83,12 +83,12 @@
       
       <div class="input-group">
         <label for="link-input">Link da Planilha (Google Drive)</label>
-        <input type="text" id="link-input" placeholder="Cole o link aqui..." oninput="gerar()">
+        <input type="text" id="link-input" placeholder="Cole o link da planilha aqui..." oninput="gerar()">
       </div>
 
       <div class="input-group">
         <label for="code-input">Título da Etiqueta</label>
-        <input type="text" id="code-input" value="LOTE 122 - MOD 4990" oninput="atualizarTexto()">
+        <input type="text" id="code-input" value="LOTE 122 - MOD 4993" oninput="atualizarTexto()">
       </div>
 
       <div class="input-group">
@@ -105,7 +105,7 @@
         <div class="bopp-label">
           <img id="qr-img" src="" alt="QR Code">
           <div>
-            <div class="label-code" id="lbl-code">LOTE 122 - MOD 4990</div>
+            <div class="label-code" id="lbl-code">LOTE 122 - MOD 4993</div>
             <div class="label-subtext" id="lbl-subtext">REF: CX-01</div>
           </div>
         </div>
@@ -132,7 +132,7 @@
         urlFinal = raw;
       }
 
-      var src = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=0&data=" + encodeURIComponent(urlFinal);
+      var src = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&margin=0&data=" + encodeURIComponent(urlFinal);
       document.getElementById('qr-img').src = src;
       atualizarTexto();
     }
