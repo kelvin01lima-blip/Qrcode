@@ -98,7 +98,6 @@
     .label-outer-wrapper { position: relative; padding: 10px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 4px; }
     .label-outer-wrapper::after { content: 'ESCALA VIRTUAL 1:1 (33x21mm)'; position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%); font-size: 0.65rem; font-family: 'Orbitron', sans-serif; color: var(--text-dim); white-space: nowrap; }
 
-    /* ETIQUETA */
     .bopp-label-preview {
       width: 165px; height: 105px; background: #ffffff; border-radius: 2px;
       display: flex; flex-direction: column; align-items: center; justify-content: space-around;
@@ -106,15 +105,8 @@
       position: relative; overflow: hidden;
     }
 
-    .bopp-label-preview img#qr-img {
-      width: 65px; height: 65px; object-fit: contain;
-    }
-
-    .bopp-label-preview .label-code {
-      font-family: Arial, sans-serif; font-size: 8px; font-weight: bold; color: #000;
-      text-align: center; max-width: 155px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-
+    .bopp-label-preview img#qr-img { width: 65px; height: 65px; object-fit: contain; }
+    .bopp-label-preview .label-code { font-family: Arial, sans-serif; font-size: 8px; font-weight: bold; color: #000; text-align: center; max-width: 155px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .bopp-label-preview .label-subtext { font-family: Arial, sans-serif; font-size: 6px; color: #333; text-align: center; }
 
     @media print {
@@ -165,7 +157,7 @@
 
       <div class="input-group">
         <label for="code-input">CÓDIGO / TÍTULO DA ETIQUETA</label>
-        <input type="text" id="code-input" value="LOTE 122 - MOD 4990" placeholder="Ex: LOTE 122 - MOD 4990" oninput="updateLabelsOnly()">
+        <input type="text" id="code-input" value="LOTE 122 - MOD 4993" placeholder="Ex: LOTE 122 - MOD 4993" oninput="updateLabelsOnly()">
       </div>
 
       <div class="input-group">
@@ -186,7 +178,7 @@
           <div class="bopp-label-preview" id="printable-label">
             <img id="qr-img" src="" alt="QR Code">
             <div>
-              <div class="label-code" id="lbl-code">LOTE 122 - MOD 4990</div>
+              <div class="label-code" id="lbl-code">LOTE 122 - MOD 4993</div>
               <div class="label-subtext" id="lbl-subtext">REF: CX-01</div>
             </div>
           </div>
@@ -209,45 +201,23 @@
       document.getElementById('lbl-subtext').innerText = document.getElementById('subtext-input').value || ' ';
     }
 
-    async function shortenUrl(url) {
-      try {
-        const res = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(url)}`);
-        if (res.ok) {
-          const short = await res.text();
-          if (short && short.startsWith('http')) return short;
-        }
-      } catch (e) {}
-      return null;
-    }
-
     async function generateQR() {
       let rawLink = document.getElementById('link-input').value.trim();
       let targetUrl = rawLink;
 
-      // Converte para a visão limpa nativa do Google Sheets (sem menus e abas)
+      // Converte para a visão limpa em HTML puro sem menus
       if (rawLink.includes("docs.google.com/spreadsheets/d/")) {
         const match = rawLink.match(/\/d\/([a-zA-Z0-9-_]+)/);
         if (match && match[1]) {
-          targetUrl = `https://docs.google.com/spreadsheets/d/${match[1]}/htmlview?gid=0`;
+          targetUrl = `https://docs.google.com/spreadsheets/d/${match[1]}/htmlview`;
         }
       }
 
-      let finalUrl = targetUrl;
+      document.getElementById('status-text').innerText = "STATUS: QR CODE PRONTO PARA IMPRESSÃO!";
+      document.getElementById('status-text').style.color = "#00ff66";
 
-      if (targetUrl.length > 25) {
-        document.getElementById('status-text').innerText = "STATUS: ENCURTANDO LINK DA PLANILHA...";
-        const shortened = await shortenUrl(targetUrl);
-        if (shortened) {
-          finalUrl = shortened;
-          document.getElementById('status-text').innerText = "STATUS: OK! ETIQUETA PRONTA PARA IMPRESSÃO!";
-          document.getElementById('status-text').style.color = "#00ff66";
-        } else {
-          document.getElementById('status-text').innerText = "STATUS: QR CODE PRONTO!";
-          document.getElementById('status-text').style.color = "#ffaa00";
-        }
-      }
-
-      const qrImageSrc = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&margin=0&ecc=L&data=${encodeURIComponent(finalUrl)}`;
+      // Gera QR Code direto na alta densidade funcional sem tela intermediária do TinyURL
+      const qrImageSrc = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&margin=0&ecc=L&data=${encodeURIComponent(targetUrl)}`;
       document.getElementById('qr-img').src = qrImageSrc;
       
       updateLabelsOnly();
@@ -255,7 +225,7 @@
 
     function resetForm() {
       document.getElementById('link-input').value = '';
-      document.getElementById('code-input').value = 'LOTE 122 - MOD 4990';
+      document.getElementById('code-input').value = 'LOTE 122 - MOD 4993';
       document.getElementById('subtext-input').value = 'REF: CX-01';
       generateQR();
     }
