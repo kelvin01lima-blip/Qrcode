@@ -158,14 +158,14 @@
       <div class="spec-badge">ESPECIFICAÇÃO: BOPP 33x21MM</div>
 
       <div class="input-group">
-        <label for="link-input">URL / LINK DESTINO</label>
-        <input type="text" id="link-input" value="https://google.com" placeholder="Cole o link da planilha aqui..." oninput="debounceUpdate()">
-        <div class="status-info" id="status-text">STATUS: AGUARDANDO LINK...</div>
+        <label for="link-input">URL / LINK DA PLANILHA NO DRIVE</label>
+        <input type="text" id="link-input" value="" placeholder="Cole o link da planilha do Google aqui..." oninput="debounceUpdate()">
+        <div class="status-info" id="status-text">STATUS: COLE O LINK DA PLANILHA...</div>
       </div>
 
       <div class="input-group">
         <label for="code-input">CÓDIGO / TÍTULO DA ETIQUETA</label>
-        <input type="text" id="code-input" value="LOTE107-4883" placeholder="Ex: LOTE107-4883" oninput="updateLabelsOnly()">
+        <input type="text" id="code-input" value="LOTE 122 - MOD 4990" placeholder="Ex: LOTE 122 - MOD 4990" oninput="updateLabelsOnly()">
       </div>
 
       <div class="input-group">
@@ -186,7 +186,7 @@
           <div class="bopp-label-preview" id="printable-label">
             <img id="qr-img" src="" alt="QR Code">
             <div>
-              <div class="label-code" id="lbl-code">LOTE107-4883</div>
+              <div class="label-code" id="lbl-code">LOTE 122 - MOD 4990</div>
               <div class="label-subtext" id="lbl-subtext">REF: CX-01</div>
             </div>
           </div>
@@ -199,7 +199,7 @@
     let timer;
 
     function debounceUpdate() {
-      document.getElementById('status-text').innerText = "STATUS: ENCURTANDO LINK...";
+      document.getElementById('status-text').innerText = "STATUS: PROCESSANDO LINK...";
       clearTimeout(timer);
       timer = setTimeout(generateQR, 500);
     }
@@ -209,9 +209,7 @@
       document.getElementById('lbl-subtext').innerText = document.getElementById('subtext-input').value || ' ';
     }
 
-    // Encurtador resiliente com Fallback múltiplo
     async function shortenUrl(url) {
-      // Método 1: TinyURL API direta (Sem CORS/Rate Limit rígido)
       try {
         const res = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(url)}`);
         if (res.ok) {
@@ -219,54 +217,39 @@
           if (short && short.startsWith('http')) return short;
         }
       } catch (e) {}
-
-      // Método 2: Is.gd via proxy alternativo
-      try {
-        const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://is.gd/create.php?format=json&url=' + encodeURIComponent(url))}`);
-        if (res.ok) {
-          const data = await res.json();
-          const parsed = JSON.parse(data.contents);
-          if (parsed.shorturl) return parsed.shorturl;
-        }
-      } catch (e) {}
-
       return null;
     }
 
     async function generateQR() {
       let rawLink = document.getElementById('link-input').value.trim();
-      if (!rawLink) rawLink = "https://google.com";
+      
+      let targetViewerUrl = "https://kelvin01lima-blip.github.io/OS-Viewer/";
 
-      let cleanLink = rawLink;
-
-      // Otimização de link do Google Sheets
+      // Se colar o link da planilha, extrai o ID automaticamente
       if (rawLink.includes("docs.google.com/spreadsheets/d/")) {
         const match = rawLink.match(/\/d\/([a-zA-Z0-9-_]+)/);
         if (match && match[1]) {
-          cleanLink = `https://docs.google.com/spreadsheets/d/${match[1]}`;
+          targetViewerUrl += `?id=${match[1]}`;
         }
+      } else if (rawLink) {
+        targetViewerUrl = rawLink;
       }
 
-      let finalUrl = cleanLink;
+      let finalUrl = targetViewerUrl;
 
-      if (cleanLink.length > 25) {
-        document.getElementById('status-text').innerText = "STATUS: ENCURTANDO LINK...";
-        const shortened = await shortenUrl(cleanLink);
-        
+      if (targetViewerUrl.length > 25) {
+        document.getElementById('status-text').innerText = "STATUS: GERANDO QR CODE FUTURISTA S.O.S...";
+        const shortened = await shortenUrl(targetViewerUrl);
         if (shortened) {
           finalUrl = shortened;
-          document.getElementById('status-text').innerText = "STATUS: OK! (LINK ENCURTADO)";
+          document.getElementById('status-text').innerText = "STATUS: OK! QR CODE FUTURISTA PRONTO!";
           document.getElementById('status-text').style.color = "#00ff66";
         } else {
-          document.getElementById('status-text').innerText = "STATUS: USANDO LINK OTIMIZADO DENSIDADE MÉDIA";
+          document.getElementById('status-text').innerText = "STATUS: QR CODE PRONTO (LINK DIRETO)";
           document.getElementById('status-text').style.color = "#ffaa00";
         }
-      } else {
-        document.getElementById('status-text').innerText = "STATUS: QR CODE PRONTO!";
-        document.getElementById('status-text').style.color = "#00f0ff";
       }
 
-      // QR Code otimizado para etiquetas pequenas (ecc=L deixa os quadrados maiores)
       const qrImageSrc = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&margin=0&ecc=L&data=${encodeURIComponent(finalUrl)}`;
       document.getElementById('qr-img').src = qrImageSrc;
       
@@ -274,8 +257,8 @@
     }
 
     function resetForm() {
-      document.getElementById('link-input').value = 'https://google.com';
-      document.getElementById('code-input').value = 'LOTE107-4883';
+      document.getElementById('link-input').value = '';
+      document.getElementById('code-input').value = 'LOTE 122 - MOD 4990';
       document.getElementById('subtext-input').value = 'REF: CX-01';
       generateQR();
     }
