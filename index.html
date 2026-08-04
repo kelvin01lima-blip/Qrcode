@@ -1,228 +1,38 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <title>CyberQR - Gerador de Etiquetas 33x21mm</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg-dark: #080b10;
-      --panel-bg: rgba(13, 20, 33, 0.85);
-      --cyan-glow: #00f0ff;
-      --magenta-glow: #ff0055;
-      --green-glow: #00ff66;
-      --border-color: rgba(0, 240, 255, 0.3);
-      --text-dim: #7a8c9e;
-    }
+<script>
+  function updateLabelsOnly() {
+    document.getElementById('lbl-code').innerText = document.getElementById('code-input').value || ' ';
+    document.getElementById('lbl-subtext').innerText = document.getElementById('subtext-input').value || ' ';
+  }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+  function generateQR() {
+    let rawLink = document.getElementById('link-input').value.trim();
+    let targetUrl = "https://kelvin01lima-blip.github.io/OS-Viewer/";
 
-    body {
-      background-color: var(--bg-dark);
-      background-image: 
-        radial-gradient(circle at 15% 15%, rgba(0, 240, 255, 0.08) 0%, transparent 40%),
-        radial-gradient(circle at 85% 85%, rgba(255, 0, 85, 0.08) 0%, transparent 40%),
-        linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
-      background-size: 100% 100%, 100% 100%, 30px 30px, 30px 30px;
-      color: #e0f2fe;
-      font-family: 'Rajdhani', sans-serif;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
-      overflow-x: hidden;
-    }
-
-    header {
-      width: 100%; max-width: 1100px; display: flex; justify-content: space-between; align-items: center;
-      padding: 15px 25px; margin-bottom: 25px; background: var(--panel-bg);
-      border: 1px solid var(--border-color); box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);
-      clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
-    }
-
-    .brand { display: flex; align-items: center; gap: 12px; }
-    .brand-icon {
-      width: 32px; height: 32px; border: 2px solid var(--cyan-glow); display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 0 10px var(--cyan-glow); clip-path: polygon(20% 0, 100% 0, 100% 80%, 80% 100%, 0 100%, 0 20%);
-    }
-    .brand-icon::after { content: ''; width: 12px; height: 12px; background: var(--cyan-glow); }
-
-    h1 { font-family: 'Orbitron', sans-serif; font-size: 1.5rem; font-weight: 800; letter-spacing: 2px; color: #fff; text-shadow: 0 0 8px rgba(0, 240, 255, 0.6); }
-    h1 span { color: var(--cyan-glow); }
-
-    .sys-status { font-family: 'Orbitron', sans-serif; font-size: 0.75rem; color: var(--green-glow); display: flex; align-items: center; gap: 8px; letter-spacing: 1px; }
-    .pulse-dot { width: 8px; height: 8px; background-color: var(--green-glow); border-radius: 50%; box-shadow: 0 0 8px var(--green-glow); animation: pulse 1.5s infinite; }
-
-    @keyframes pulse { 0% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } 100% { opacity: 0.3; transform: scale(0.8); } }
-
-    .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; width: 100%; max-width: 1100px; }
-    @media (max-width: 850px) { .dashboard-grid { grid-template-columns: 1fr; } }
-
-    .panel {
-      background: var(--panel-bg); border: 1px solid var(--border-color); padding: 25px; position: relative;
-      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5); clip-path: polygon(0 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
-    }
-    .panel::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, var(--cyan-glow), transparent); }
-
-    .panel-title { font-family: 'Orbitron', sans-serif; font-size: 1rem; color: var(--cyan-glow); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; letter-spacing: 1px; text-transform: uppercase; }
-    .panel-title::before { content: '//'; color: var(--magenta-glow); }
-
-    .input-group { margin-bottom: 18px; }
-    label { display: block; font-size: 0.85rem; color: var(--text-dim); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
-
-    input[type="text"] {
-      width: 100%; padding: 12px 15px; background: rgba(4, 8, 15, 0.8); border: 1px solid rgba(0, 240, 255, 0.2);
-      color: #fff; font-family: 'Rajdhani', sans-serif; font-size: 1rem; outline: none; transition: all 0.3s;
-    }
-    input[type="text"]:focus { border-color: var(--cyan-glow); box-shadow: 0 0 10px rgba(0, 240, 255, 0.3); }
-
-    .spec-badge { display: inline-block; padding: 4px 10px; background: rgba(0, 240, 255, 0.1); border: 1px solid var(--cyan-glow); color: var(--cyan-glow); font-family: 'Orbitron', sans-serif; font-size: 0.75rem; margin-bottom: 15px; }
-    .status-info { font-size: 0.75rem; color: var(--cyan-glow); margin-top: 5px; font-weight: bold; }
-
-    .btn-group { display: flex; gap: 12px; margin-top: 25px; }
-    .btn {
-      flex: 1; padding: 14px; font-family: 'Orbitron', sans-serif; font-size: 0.85rem; font-weight: 700;
-      letter-spacing: 1px; text-transform: uppercase; border: none; cursor: pointer; transition: all 0.2s;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-    }
-    .btn-primary { background: var(--cyan-glow); color: #000; box-shadow: 0 0 15px rgba(0, 240, 255, 0.4); clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
-    .btn-primary:hover { background: #fff; box-shadow: 0 0 25px rgba(0, 240, 255, 0.8); transform: translateY(-2px); }
-    .btn-secondary { background: transparent; border: 1px solid var(--magenta-glow); color: var(--magenta-glow); box-shadow: 0 0 10px rgba(255, 0, 85, 0.2); clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
-    .btn-secondary:hover { background: rgba(255, 0, 85, 0.15); color: #fff; box-shadow: 0 0 20px rgba(255, 0, 85, 0.5); transform: translateY(-2px); }
-
-    .preview-stage { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 280px; background: rgba(4, 8, 15, 0.9); border: 1px dashed rgba(0, 240, 255, 0.2); padding: 20px; position: relative; }
-    .label-outer-wrapper { position: relative; padding: 10px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 4px; }
-    .label-outer-wrapper::after { content: 'ESCALA VIRTUAL 1:1 (33x21mm)'; position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%); font-size: 0.65rem; font-family: 'Orbitron', sans-serif; color: var(--text-dim); white-space: nowrap; }
-
-    .bopp-label-preview {
-      width: 165px; height: 105px; background: #ffffff; border-radius: 2px;
-      display: flex; flex-direction: column; align-items: center; justify-content: space-around;
-      padding: 4px; color: #000; box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
-      position: relative; overflow: hidden;
-    }
-
-    .bopp-label-preview img#qr-img { width: 65px; height: 65px; object-fit: contain; }
-    .bopp-label-preview .label-code { font-family: Arial, sans-serif; font-size: 8px; font-weight: bold; color: #000; text-align: center; max-width: 155px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .bopp-label-preview .label-subtext { font-family: Arial, sans-serif; font-size: 6px; color: #333; text-align: center; }
-
-    @media print {
-      @page { size: 33mm 21mm; margin: 0; }
-      *, *::before, *::after { box-shadow: none !important; text-shadow: none !important; }
-      body { background: #fff !important; padding: 0 !important; margin: 0 !important; width: 33mm !important; height: 21mm !important; display: block !important; }
-      header, .dashboard-grid > .panel:first-child, .panel-title, .spec-badge, .btn-group, .label-outer-wrapper::after, .status-info { display: none !important; }
-      .dashboard-grid { display: block !important; width: 33mm !important; }
-      .panel { border: none !important; background: transparent !important; padding: 0 !important; clip-path: none !important; }
-      .preview-stage { background: transparent !important; border: none !important; min-height: 0 !important; padding: 0 !important; }
-      .label-outer-wrapper { padding: 0 !important; border: none !important; background: transparent !important; }
-
-      .bopp-label-preview {
-        width: 33mm !important; height: 21mm !important; box-shadow: none !important; border-radius: 0 !important;
-        padding: 1mm !important; page-break-after: always; page-break-inside: avoid;
-        justify-content: flex-start !important; align-items: center !important;
+    if (rawLink.includes("docs.google.com/spreadsheets/d/")) {
+      const match = rawLink.match(/\/d\/([a-zA-Z0-9-_]+)/);
+      if (match && match[1]) {
+        targetUrl += `?id=${match[1]}`;
       }
-
-      .bopp-label-preview img#qr-img { width: 14mm !important; height: 14mm !important; margin-bottom: 0.5mm; }
-      .bopp-label-preview .label-code { font-size: 5pt !important; max-width: 31mm !important; }
-      .bopp-label-preview .label-subtext { font-size: 4pt !important; }
-    }
-  </style>
-</head>
-<body>
-
-  <header>
-    <div class="brand">
-      <div class="brand-icon"></div>
-      <h1>CYBER<span>QR</span> // OS</h1>
-    </div>
-    <div class="sys-status">
-      <div class="pulse-dot"></div>
-      MODO IMPRESSÃO: BOPP 33x21MM
-    </div>
-  </header>
-
-  <div class="dashboard-grid">
-    <div class="panel">
-      <div class="panel-title">MATRIZ DE DADOS</div>
-      <div class="spec-badge">ESPECIFICAÇÃO: BOPP 33x21MM</div>
-
-      <div class="input-group">
-        <label for="link-input">URL / LINK DA PLANILHA NO DRIVE</label>
-        <input type="text" id="link-input" value="" placeholder="Cole o link da planilha aqui..." oninput="generateQR()">
-        <div class="status-info" id="status-text">STATUS: COLE O LINK DA PLANILHA...</div>
-      </div>
-
-      <div class="input-group">
-        <label for="code-input">CÓDIGO / TÍTULO DA ETIQUETA</label>
-        <input type="text" id="code-input" value="LOTE 122 - MOD 4993" placeholder="Ex: LOTE 122 - MOD 4993" oninput="updateLabelsOnly()">
-      </div>
-
-      <div class="input-group">
-        <label for="subtext-input">SUB-TEXTO / SKU (OPCIONAL)</label>
-        <input type="text" id="subtext-input" value="REF: CX-01" placeholder="Ex: REF: CX-01" oninput="updateLabelsOnly()">
-      </div>
-
-      <div class="btn-group">
-        <button class="btn btn-primary" onclick="window.print()">IMPRIMIR ETIQUETA</button>
-        <button class="btn btn-secondary" onclick="resetForm()">RESTAURAR</button>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-title">PRÉ-VISUALIZAÇÃO DE HARDWARE</div>
-      <div class="preview-stage">
-        <div class="label-outer-wrapper">
-          <div class="bopp-label-preview" id="printable-label">
-            <img id="qr-img" src="" alt="QR Code">
-            <div>
-              <div class="label-code" id="lbl-code">LOTE 122 - MOD 4993</div>
-              <div class="label-subtext" id="lbl-subtext">REF: CX-01</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    function updateLabelsOnly() {
-      document.getElementById('lbl-code').innerText = document.getElementById('code-input').value || ' ';
-      document.getElementById('lbl-subtext').innerText = document.getElementById('subtext-input').value || ' ';
+    } else if (rawLink) {
+      targetUrl = rawLink;
     }
 
-    function generateQR() {
-      let rawLink = document.getElementById('link-input').value.trim();
-      let targetUrl = rawLink;
+    document.getElementById('status-text').innerText = "STATUS: OK! QR CODE FUTURISTA PRONTO!";
+    document.getElementById('status-text').style.color = "#00ff66";
 
-      if (rawLink.includes("docs.google.com/spreadsheets/d/")) {
-        const match = rawLink.match(/\/d\/([a-zA-Z0-9-_]+)/);
-        if (match && match[1]) {
-          targetUrl = `https://docs.google.com/spreadsheets/d/${match[1]}/htmlview`;
-        }
-      }
+    // QR Code direto apontando para o leitor OS-Viewer
+    const qrImageSrc = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&margin=0&ecc=L&data=${encodeURIComponent(targetUrl)}`;
+    document.getElementById('qr-img').src = qrImageSrc;
+    
+    updateLabelsOnly();
+  }
 
-      if (targetUrl) {
-        document.getElementById('status-text').innerText = "STATUS: OK! QR CODE DIRETO PRONTO!";
-        document.getElementById('status-text').style.color = "#00ff66";
-      }
+  function resetForm() {
+    document.getElementById('link-input').value = '';
+    document.getElementById('code-input').value = 'LOTE 122 - MOD 4993';
+    document.getElementById('subtext-input').value = 'REF: CX-01';
+    generateQR();
+  }
 
-      const qrImageSrc = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&margin=0&ecc=L&data=${encodeURIComponent(targetUrl || 'S.O.S')}`;
-      document.getElementById('qr-img').src = qrImageSrc;
-      
-      updateLabelsOnly();
-    }
-
-    function resetForm() {
-      document.getElementById('link-input').value = '';
-      document.getElementById('code-input').value = 'LOTE 122 - MOD 4993';
-      document.getElementById('subtext-input').value = 'REF: CX-01';
-      generateQR();
-    }
-
-    window.onload = generateQR;
-  </script>
-</body>
-</html>
+  window.onload = generateQR;
+</script>
