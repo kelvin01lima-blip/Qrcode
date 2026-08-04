@@ -159,7 +159,7 @@
 
       <div class="input-group">
         <label for="link-input">URL / LINK DA PLANILHA NO DRIVE</label>
-        <input type="text" id="link-input" value="" placeholder="Cole o link da planilha do Google aqui..." oninput="debounceUpdate()">
+        <input type="text" id="link-input" value="" placeholder="Cole o link de qualquer planilha aqui..." oninput="debounceUpdate()">
         <div class="status-info" id="status-text">STATUS: COLE O LINK DA PLANILHA...</div>
       </div>
 
@@ -222,30 +222,27 @@
 
     async function generateQR() {
       let rawLink = document.getElementById('link-input').value.trim();
-      
-      let targetViewerUrl = "https://kelvin01lima-blip.github.io/OS-Viewer/";
+      let targetUrl = rawLink;
 
-      // Se colar o link da planilha, extrai o ID automaticamente
+      // Converte para a visão limpa nativa do Google Sheets (sem menus e abas)
       if (rawLink.includes("docs.google.com/spreadsheets/d/")) {
         const match = rawLink.match(/\/d\/([a-zA-Z0-9-_]+)/);
         if (match && match[1]) {
-          targetViewerUrl += `?id=${match[1]}`;
+          targetUrl = `https://docs.google.com/spreadsheets/d/${match[1]}/htmlview?gid=0`;
         }
-      } else if (rawLink) {
-        targetViewerUrl = rawLink;
       }
 
-      let finalUrl = targetViewerUrl;
+      let finalUrl = targetUrl;
 
-      if (targetViewerUrl.length > 25) {
-        document.getElementById('status-text').innerText = "STATUS: GERANDO QR CODE FUTURISTA S.O.S...";
-        const shortened = await shortenUrl(targetViewerUrl);
+      if (targetUrl.length > 25) {
+        document.getElementById('status-text').innerText = "STATUS: ENCURTANDO LINK DA PLANILHA...";
+        const shortened = await shortenUrl(targetUrl);
         if (shortened) {
           finalUrl = shortened;
-          document.getElementById('status-text').innerText = "STATUS: OK! QR CODE FUTURISTA PRONTO!";
+          document.getElementById('status-text').innerText = "STATUS: OK! ETIQUETA PRONTA PARA IMPRESSÃO!";
           document.getElementById('status-text').style.color = "#00ff66";
         } else {
-          document.getElementById('status-text').innerText = "STATUS: QR CODE PRONTO (LINK DIRETO)";
+          document.getElementById('status-text').innerText = "STATUS: QR CODE PRONTO!";
           document.getElementById('status-text').style.color = "#ffaa00";
         }
       }
