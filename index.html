@@ -126,13 +126,15 @@
       if (raw.indexOf("docs.google.com/spreadsheets/d/") !== -1) {
         var m = raw.match(/\/d\/([a-zA-Z0-9-_]+)/);
         if (m && m[1]) {
-          urlFinal += "?id=" + m[1];
+          // Utiliza '?p=' para manter o link o mais curto possível para a etiqueta
+          urlFinal += "?p=" + m[1];
         }
       } else if (raw !== "") {
         urlFinal = raw;
       }
 
-      var src = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&margin=0&data=" + encodeURIComponent(urlFinal);
+      // Adicionado '&ecc=L' para gerar quadradinhos limpos e grandes ideais para papel/térmica
+      var src = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&margin=0&ecc=L&data=" + encodeURIComponent(urlFinal);
       document.getElementById('qr-img').src = src;
       atualizarTexto();
     }
