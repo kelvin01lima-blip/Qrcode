@@ -2,26 +2,24 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>CyberQR - Gerador de Etiquetas</title>
+  <title>S.O.S - Gerador de Etiquetas</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-  <!-- Importando a biblioteca nativa de QR Code que aceita controle total de pontos -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     :root {
-      --bg-dark: #080b10;
-      --panel-bg: rgba(13, 20, 33, 0.9);
-      --cyan-glow: #00f0ff;
-      --magenta-glow: #ff0055;
-      --green-glow: #00ff66;
-      --border-color: rgba(0, 240, 255, 0.3);
-      --text-dim: #7a8c9e;
+      --bg-dark: #0f172a;
+      --panel-bg: #1e293b;
+      --orange-sos: #f97316;
+      --orange-glow: rgba(249, 115, 22, 0.4);
+      --border-color: rgba(249, 115, 22, 0.3);
+      --text-dim: #94a3b8;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       background-color: var(--bg-dark);
-      color: #e0f2fe;
+      color: #f8fafc;
       font-family: 'Rajdhani', sans-serif;
       min-height: 100vh;
       display: flex;
@@ -31,31 +29,39 @@
     }
     header {
       width: 100%; max-width: 1000px; display: flex; justify-content: space-between; align-items: center;
-      padding: 15px 20px; margin-bottom: 20px; background: var(--panel-bg);
+      padding: 15px 25px; margin-bottom: 20px; background: var(--panel-bg);
       border: 1px solid var(--border-color);
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
-    h1 { font-family: 'Orbitron', sans-serif; font-size: 1.4rem; color: #fff; }
-    h1 span { color: var(--cyan-glow); }
+    h1 { font-family: 'Orbitron', sans-serif; font-size: 1.3rem; color: #fff; letter-spacing: 1px; }
+    h1 span { color: var(--orange-sos); }
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; max-width: 1000px; }
     @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
-    .panel { background: var(--panel-bg); border: 1px solid var(--border-color); padding: 20px; }
-    .panel-title { font-family: 'Orbitron', sans-serif; font-size: 0.95rem; color: var(--cyan-glow); margin-bottom: 15px; }
+    .panel { background: var(--panel-bg); border: 1px solid var(--border-color); padding: 25px; border-radius: 6px; }
+    .panel-title { font-family: 'Orbitron', sans-serif; font-size: 0.9rem; color: var(--orange-sos); margin-bottom: 15px; letter-spacing: 1px; }
     .input-group { margin-bottom: 15px; }
-    label { display: block; font-size: 0.8rem; color: var(--text-dim); margin-bottom: 5px; text-transform: uppercase; }
+    label { display: block; font-size: 0.8rem; color: var(--text-dim); margin-bottom: 5px; text-transform: uppercase; font-weight: 600; }
     input[type="text"] {
-      width: 100%; padding: 10px; background: #04080f; border: 1px solid var(--border-color);
-      color: #fff; font-family: 'Rajdhani', sans-serif; font-size: 1rem; outline: none;
+      width: 100%; padding: 11px; background: #0b1329; border: 1px solid var(--border-color);
+      color: #fff; font-family: 'Rajdhani', sans-serif; font-size: 1rem; border-radius: 4px; outline: none;
+    }
+    input[type="text"]:focus {
+      border-color: var(--orange-sos);
+      box-shadow: 0 0 8px var(--orange-glow);
     }
     .btn {
       width: 100%; padding: 12px; font-family: 'Orbitron', sans-serif; font-size: 0.85rem; font-weight: bold;
-      background: var(--cyan-glow); color: #000; border: none; cursor: pointer; margin-top: 10px;
+      background: var(--orange-sos); color: #fff; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px;
+      box-shadow: 0 4px 12px var(--orange-glow);
+      transition: background 0.2s;
     }
-    .preview-stage { display: flex; justify-content: center; align-items: center; min-height: 220px; background: #04080f; border: 1px dashed var(--border-color); padding: 15px; }
+    .btn:hover { background: #ea580c; }
+    .preview-stage { display: flex; justify-content: center; align-items: center; min-height: 220px; background: #0b1329; border: 1px dashed var(--border-color); border-radius: 4px; padding: 15px; }
     .bopp-label {
       width: 165px; height: 105px; background: #fff; padding: 4px; color: #000;
       display: flex; flex-direction: column; align-items: center; justify-content: space-around;
     }
-    /* Caixa onde o QR Code vai ser desenhado em alta definição */
     #qrcode-container { width: 65px; height: 65px; display: flex; justify-content: center; align-items: center; }
     #qrcode-container canvas, #qrcode-container img { width: 100% !important; height: 100% !important; }
 
@@ -79,8 +85,8 @@
 <body>
 
   <header>
-    <h1>CYBER<span>QR</span> // OS</h1>
-    <div style="color: var(--green-glow); font-size: 0.8rem; font-family: 'Orbitron';">SISTEMA ATIVO</div>
+    <h1>S.O.S <span>SOLUÇÕES</span> // QR ETIQUETAS</h1>
+    <div style="color: #4ade80; font-size: 0.8rem; font-family: 'Orbitron'; font-weight: bold;">● SISTEMA ATIVO</div>
   </header>
 
   <div class="grid">
@@ -98,8 +104,8 @@
       </div>
 
       <div class="input-group">
-        <label for="subtext-input">Sub-texto / SKU</label>
-        <input type="text" id="subtext-input" value="REF: CX-01" oninput="atualizarTexto()">
+        <label for="subtext-input">Tipo de Peça</label>
+        <input type="text" id="subtext-input" value="ANEL" oninput="atualizarTexto()">
       </div>
 
       <button class="btn" onclick="window.print()">IMPRIMIR ETIQUETA</button>
@@ -112,7 +118,7 @@
           <div id="qrcode-container"></div>
           <div>
             <div class="label-code" id="lbl-code">LOTE 122 - MOD 4993</div>
-            <div class="label-subtext" id="lbl-subtext">REF: CX-01</div>
+            <div class="label-subtext" id="lbl-subtext">ANEL</div>
           </div>
         </div>
       </div>
@@ -138,10 +144,8 @@
         urlFinal = raw;
       }
 
-      // Limpa o QR Code anterior
       document.getElementById('qrcode-container').innerHTML = "";
 
-      // Gera o QR Code localmente usando nível de correção 'L' (Low), deixando os blocos grandes
       new QRCode(document.getElementById('qrcode-container'), {
         text: urlFinal,
         width: 150,
