@@ -9,12 +9,12 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     :root {
-      --bg-dark: #0f172a;
-      --panel-bg: #1e293b;
+      --bg-dark: #1e293b;
+      --panel-bg: #334155;
       --orange-sos: #f97316;
       --orange-glow: rgba(249, 115, 22, 0.4);
-      --border-color: rgba(249, 115, 22, 0.3);
-      --text-dim: #94a3b8;
+      --border-color: rgba(249, 115, 22, 0.5);
+      --text-dim: #cbd5e1;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -38,12 +38,12 @@
     h1 span { color: var(--orange-sos); }
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; max-width: 1000px; }
     @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
-    .panel { background: var(--panel-bg); border: 1px solid var(--border-color); padding: 25px; border-radius: 6px; }
+    .panel { background: var(--panel-bg); border: 1px solid var(--border-color); padding: 25px; border-radius: 6px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
     .panel-title { font-family: 'Orbitron', sans-serif; font-size: 0.9rem; color: var(--orange-sos); margin-bottom: 15px; letter-spacing: 1px; }
     .input-group { margin-bottom: 15px; }
     label { display: block; font-size: 0.8rem; color: var(--text-dim); margin-bottom: 5px; text-transform: uppercase; font-weight: 600; }
     input[type="text"] {
-      width: 100%; padding: 11px; background: #0b1329; border: 1px solid var(--border-color);
+      width: 100%; padding: 11px; background: #1e293b; border: 1px solid var(--border-color);
       color: #fff; font-family: 'Rajdhani', sans-serif; font-size: 1rem; border-radius: 4px; outline: none;
     }
     input[type="text"]:focus {
@@ -57,7 +57,7 @@
       transition: background 0.2s;
     }
     .btn:hover { background: #ea580c; }
-    .preview-stage { display: flex; justify-content: center; align-items: center; min-height: 220px; background: #0b1329; border: 1px dashed var(--border-color); border-radius: 4px; padding: 15px; }
+    .preview-stage { display: flex; justify-content: center; align-items: center; min-height: 220px; background: #1e293b; border: 1px dashed var(--border-color); border-radius: 4px; padding: 15px; }
     .bopp-label {
       width: 165px; height: 105px; background: #fff; padding: 4px; color: #000;
       display: flex; flex-direction: column; align-items: center; justify-content: space-around;
