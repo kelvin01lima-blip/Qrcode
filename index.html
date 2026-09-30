@@ -6,8 +6,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-  <!-- Biblioteca local robusta para gerar QR Code com matriz limpa -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     :root {
       --bg-dark: #1e293b;
@@ -59,14 +57,20 @@
     }
     .btn:hover { background: #ea580c; }
     .preview-stage { display: flex; justify-content: center; align-items: center; min-height: 220px; background: #1e293b; border: 1px dashed var(--border-color); border-radius: 4px; padding: 15px; }
+    
     .bopp-label {
       width: 165px; height: 105px; background: #fff; padding: 4px; color: #000;
       display: flex; flex-direction: column; align-items: center; justify-content: space-around;
     }
     
-    /* Container otimizado para o QR Code local */
-    #qrcode-container { width: 65px; height: 65px; display: flex; justify-content: center; align-items: center; }
-    #qrcode-container canvas, #qrcode-container img { width: 100% !important; height: 100% !important; image-rendering: pixelated; }
+    /* Força nitidez absoluta sem anti-aliasing na imagem do QR Code */
+    .bopp-label img { 
+      width: 65px; 
+      height: 65px; 
+      display: block; 
+      image-rendering: pixelated; 
+      image-rendering: crisp-edges;
+    }
 
     .label-code { font-family: Arial, sans-serif; font-size: 8px; font-weight: bold; color: #000; text-align: center; }
     .label-subtext { font-family: Arial, sans-serif; font-size: 6px; color: #333; text-align: center; }
@@ -79,7 +83,14 @@
       .panel { border: none; background: transparent; padding: 0; }
       .preview-stage { background: transparent; border: none; min-height: 0; padding: 0; }
       .bopp-label { width: 33mm; height: 21mm; padding: 1mm; justify-content: flex-start; }
-      #qrcode-container { width: 14mm !important; height: 14mm !important; }
+      
+      /* Força a impressora térmica a queimar os pixels puros sem borrar */
+      .bopp-label img { 
+        width: 14mm !important; 
+        height: 14mm !important; 
+        image-rendering: pixelated; 
+        image-rendering: crisp-edges;
+      }
       .label-code { font-size: 5pt; }
       .label-subtext { font-size: 4pt; }
     }
@@ -103,7 +114,7 @@
 
       <div class="input-group">
         <label for="code-input">Título da Etiqueta</label>
-        <input type="text" id="code-input" value="LOTE 122 - MOD 4993" oninput="atualizarTexto()">
+        <input type="text" id="code-input" value="LOTE 141 - MOD 5855" oninput="atualizarTexto()">
       </div>
 
       <div class="input-group">
@@ -118,9 +129,9 @@
       <div class="panel-title">// PRÉ-VISUALIZAÇÃO (33x21mm)</div>
       <div class="preview-stage">
         <div class="bopp-label">
-          <div id="qrcode-container"></div>
+          <img id="qr-img" src="" alt="QR Code">
           <div>
-            <div class="label-code" id="lbl-code">LOTE 122 - MOD 4993</div>
+            <div class="label-code" id="lbl-code">LOTE 141 - MOD 5855</div>
             <div class="label-subtext" id="lbl-subtext">ANEL</div>
           </div>
         </div>
@@ -147,19 +158,9 @@
         urlFinal = raw;
       }
 
-      // Limpa o QR Code anterior
-      document.getElementById('qrcode-container').innerHTML = "";
-
-      // Gera localmente com o nível 'L' (Low), garantindo blocos grandes e sem borrões na impressora térmica
-      new QRCode(document.getElementById('qrcode-container'), {
-        text: urlFinal,
-        width: 128,
-        height: 128,
-        colorDark : "#000000",
-        colorLight : "#ffffff",
-        correctLevel: QRCode.CorrectLevel.L
-      });
-
+      // Usa a API original limpa e de alto contraste exatamente como funcionava antes
+      var src = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=0&data=" + encodeURIComponent(urlFinal);
+      document.getElementById('qr-img').src = src;
       atualizarTexto();
     }
 
