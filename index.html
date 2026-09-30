@@ -6,7 +6,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     :root {
       --bg-dark: #1e293b;
@@ -64,17 +63,13 @@
       display: flex; flex-direction: column; align-items: center; justify-content: space-around;
     }
     
-    #qrcode-box {
-      width: 65px;
-      height: 65px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    #qrcode-box canvas, #qrcode-box img {
-      width: 100% !important;
-      height: 100% !important;
-      image-rendering: pixelated;
+    /* Força nitidez absoluta e corta qualquer suavização de pixel da impressora */
+    .bopp-label img { 
+      width: 65px; 
+      height: 65px; 
+      display: block; 
+      image-rendering: pixelated; 
+      image-rendering: crisp-edges;
     }
 
     .label-code { font-family: Arial, sans-serif; font-size: 8px; font-weight: bold; color: #000; text-align: center; }
@@ -89,14 +84,11 @@
       .preview-stage { background: transparent; border: none; min-height: 0; padding: 0; }
       .bopp-label { width: 33mm; height: 21mm; padding: 1mm; justify-content: flex-start; }
       
-      #qrcode-box {
-        width: 14mm !important;
-        height: 14mm !important;
-      }
-      #qrcode-box canvas, #qrcode-box img {
-        width: 14mm !important;
-        height: 14mm !important;
-        image-rendering: pixelated;
+      .bopp-label img { 
+        width: 14mm !important; 
+        height: 14mm !important; 
+        image-rendering: pixelated; 
+        image-rendering: crisp-edges;
       }
       .label-code { font-size: 5pt; }
       .label-subtext { font-size: 4pt; }
@@ -120,7 +112,7 @@
       </div>
 
       <div class="input-group">
-        <label for="code-input">Título da Erriqueta</label>
+        <label for="code-input">Título da Etiqueta</label>
         <input type="text" id="code-input" value="LOTE 141 - MOD 5855" oninput="atualizarTexto()">
       </div>
 
@@ -136,7 +128,7 @@
       <div class="panel-title">// PRÉ-VISUALIZAÇÃO (33x21mm)</div>
       <div class="preview-stage">
         <div class="bopp-label">
-          <div id="qrcode-box"></div>
+          <img id="qr-img" src="" alt="QR Code">
           <div>
             <div class="label-code" id="lbl-code">LOTE 141 - MOD 5855</div>
             <div class="label-subtext" id="lbl-subtext">ANEL</div>
@@ -154,8 +146,6 @@
 
     function gerar() {
       var raw = document.getElementById('link-input').value.trim();
-      
-      // USAMOS O PARÂMETRO CURTO ?p= PARA ENCURTAR AO MÁXIMO O LINK E DEIXAR O QR CODE GIGANTE E LEGÍVEL
       var urlFinal = "https://kelvin01lima-blip.github.io/OS-Viewer/";
 
       if (raw.indexOf("docs.google.com/spreadsheets/d/") !== -1) {
@@ -167,18 +157,9 @@
         urlFinal = raw;
       }
 
-      document.getElementById('qrcode-box').innerHTML = "";
-
-      // Renderiza com correção L para garantir blocos grossos que a Argox imprime perfeitamente
-      new QRCode(document.getElementById('qrcode-box'), {
-        text: urlFinal,
-        width: 128,
-        height: 128,
-        colorDark: "#000000",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.L
-      });
-
+      // API ultra limpa com correção 'L' (blocos grandes e abertos) e tamanho ideal para contraste térmico
+      var src = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=0&ecc=L&data=" + encodeURIComponent(urlFinal);
+      document.getElementById('qr-img').src = src;
       atualizarTexto();
     }
 
