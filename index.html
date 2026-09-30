@@ -145,17 +145,21 @@
 
     function gerar() {
       var raw = document.getElementById('link-input').value.trim();
-      var idPlanilha = raw;
+      
+      // Monta o link curto com ?p= que o telemóvel reconhece instantaneamente como site web
+      var urlFinal = "https://kelvin01lima-blip.github.io/OS-Viewer/";
 
       if (raw.indexOf("docs.google.com/spreadsheets/d/") !== -1) {
         var m = raw.match(/\/d\/([a-zA-Z0-9-_]+)/);
         if (m && m[1]) {
-          idPlanilha = m[1];
+          urlFinal += "?p=" + m[1];
         }
+      } else if (raw !== "") {
+        urlFinal = raw;
       }
 
-      // Codifica APENAS o ID puro com correção L para o QR Code ficar o mais limpo e legível possível
-      var src = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=0&ecc=L&data=" + encodeURIComponent(idPlanilha);
+      // Gera com a API de alto contraste e correção L (mantém os blocos grandes e legíveis que acabaste de testar)
+      var src = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=0&ecc=L&data=" + encodeURIComponent(urlFinal);
       document.getElementById('qr-img').src = src;
       atualizarTexto();
     }
