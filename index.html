@@ -120,7 +120,7 @@
       </div>
 
       <div class="input-group">
-        <label for="code-input">Título da Etiqueta</label>
+        <label for="code-input">Título da Erriqueta</label>
         <input type="text" id="code-input" value="LOTE 141 - MOD 5855" oninput="atualizarTexto()">
       </div>
 
@@ -154,12 +154,14 @@
 
     function gerar() {
       var raw = document.getElementById('link-input').value.trim();
+      
+      // USAMOS O PARÂMETRO CURTO ?p= PARA ENCURTAR AO MÁXIMO O LINK E DEIXAR O QR CODE GIGANTE E LEGÍVEL
       var urlFinal = "https://kelvin01lima-blip.github.io/OS-Viewer/";
 
       if (raw.indexOf("docs.google.com/spreadsheets/d/") !== -1) {
         var m = raw.match(/\/d\/([a-zA-Z0-9-_]+)/);
         if (m && m[1]) {
-          urlFinal += "?id=" + m[1];
+          urlFinal += "?p=" + m[1];
         }
       } else if (raw !== "") {
         urlFinal = raw;
@@ -167,7 +169,7 @@
 
       document.getElementById('qrcode-box').innerHTML = "";
 
-      // Gera o QR Code com o link completo do Viewer mas mantendo o nível 'L' para leitura rápida na Argox
+      // Renderiza com correção L para garantir blocos grossos que a Argox imprime perfeitamente
       new QRCode(document.getElementById('qrcode-box'), {
         text: urlFinal,
         width: 128,
