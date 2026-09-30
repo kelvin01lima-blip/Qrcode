@@ -138,21 +138,18 @@
 
     function gerar() {
       var raw = document.getElementById('link-input').value.trim();
-      
-      // Monta o link apontando perfeitamente para o Viewer com o parâmetro ?id=
-      var urlFinal = "https://kelvin01lima-blip.github.io/OS-Viewer/";
+      var idPlanilha = raw;
 
+      // Extrai APENAS o ID puro da planilha do Google Docs
       if (raw.indexOf("docs.google.com/spreadsheets/d/") !== -1) {
         var m = raw.match(/\/d\/([a-zA-Z0-9-_]+)/);
         if (m && m[1]) {
-          urlFinal += "?id=" + m[1];
+          idPlanilha = m[1];
         }
-      } else if (raw !== "") {
-        urlFinal = raw;
       }
 
-      // Gera o QR Code com correção 'L' para garantir blocos largos e limpos na impressão térmica
-      var src = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=0&ecc=L&data=" + encodeURIComponent(urlFinal);
+      // Gera o QR Code contendo APENAS o ID puro com correção baixa (L) para blocos gigantes e legíveis
+      var src = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=0&ecc=L&data=" + encodeURIComponent(idPlanilha);
       document.getElementById('qr-img').src = src;
       atualizarTexto();
     }
