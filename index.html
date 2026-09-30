@@ -63,13 +63,11 @@
       display: flex; flex-direction: column; align-items: center; justify-content: space-around;
     }
     
-    /* Força nitidez absoluta sem anti-aliasing na imagem do QR Code */
     .bopp-label img { 
       width: 65px; 
       height: 65px; 
       display: block; 
       image-rendering: pixelated; 
-      image-rendering: crisp-edges;
     }
 
     .label-code { font-family: Arial, sans-serif; font-size: 8px; font-weight: bold; color: #000; text-align: center; }
@@ -83,14 +81,7 @@
       .panel { border: none; background: transparent; padding: 0; }
       .preview-stage { background: transparent; border: none; min-height: 0; padding: 0; }
       .bopp-label { width: 33mm; height: 21mm; padding: 1mm; justify-content: flex-start; }
-      
-      /* Força a impressora térmica a queimar os pixels puros sem borrar */
-      .bopp-label img { 
-        width: 14mm !important; 
-        height: 14mm !important; 
-        image-rendering: pixelated; 
-        image-rendering: crisp-edges;
-      }
+      .bopp-label img { width: 14mm !important; height: 14mm !important; image-rendering: pixelated; }
       .label-code { font-size: 5pt; }
       .label-subtext { font-size: 4pt; }
     }
@@ -147,19 +138,21 @@
 
     function gerar() {
       var raw = document.getElementById('link-input').value.trim();
+      
+      // Monta o link apontando perfeitamente para o Viewer com o parâmetro ?id=
       var urlFinal = "https://kelvin01lima-blip.github.io/OS-Viewer/";
 
       if (raw.indexOf("docs.google.com/spreadsheets/d/") !== -1) {
         var m = raw.match(/\/d\/([a-zA-Z0-9-_]+)/);
         if (m && m[1]) {
-          urlFinal += "?p=" + m[1];
+          urlFinal += "?id=" + m[1];
         }
       } else if (raw !== "") {
         urlFinal = raw;
       }
 
-      // Usa a API original limpa e de alto contraste exatamente como funcionava antes
-      var src = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=0&data=" + encodeURIComponent(urlFinal);
+      // Gera o QR Code com correção 'L' para garantir blocos largos e limpos na impressão térmica
+      var src = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=0&ecc=L&data=" + encodeURIComponent(urlFinal);
       document.getElementById('qr-img').src = src;
       atualizarTexto();
     }
