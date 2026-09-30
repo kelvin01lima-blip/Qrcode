@@ -6,6 +6,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <!-- Biblioteca para gerar o Código de Barras Code 128 localmente -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js"></script>
   <style>
     :root {
       --bg-dark: #1e293b;
@@ -61,7 +63,9 @@
       width: 165px; height: 105px; background: #fff; padding: 4px; color: #000;
       display: flex; flex-direction: column; align-items: center; justify-content: space-around;
     }
-    .bopp-label img { width: 65px; height: 65px; display: block; }
+    /* Estilização do código de barras na pré-visualização */
+    #barcode-element { width: 140px; height: 50px; display: block; }
+
     .label-code { font-family: Arial, sans-serif; font-size: 8px; font-weight: bold; color: #000; text-align: center; }
     .label-subtext { font-family: Arial, sans-serif; font-size: 6px; color: #333; text-align: center; }
     
@@ -72,8 +76,8 @@
       .grid { display: block; width: 33mm; }
       .panel { border: none; background: transparent; padding: 0; }
       .preview-stage { background: transparent; border: none; min-height: 0; padding: 0; }
-      .bopp-label { width: 33mm; height: 21mm; padding: 1mm; justify-content: flex-start; }
-      .bopp-label img { width: 14mm !important; height: 14mm !important; }
+      .bopp-label { width: 33mm; height: 21mm; padding: 1mm; justify-content: flex-start; align-items: center; }
+      #barcode-element { width: 28mm !important; height: 10mm !important; }
       .label-code { font-size: 5pt; }
       .label-subtext { font-size: 4pt; }
     }
@@ -82,7 +86,7 @@
 <body>
 
   <header>
-    <h1>S.O.S <span>SOLUÇÕES</span> // QR ETIQUETAS</h1>
+    <h1>S.O.S <span>SOLUÇÕES</span> // CÓDIGO DE BARRAS</h1>
     <div style="color: #4ade80; font-size: 0.8rem; font-family: 'Orbitron'; font-weight: bold;">● SISTEMA ATIVO</div>
   </header>
 
@@ -91,8 +95,8 @@
       <div class="panel-title">// DADOS DA ETIQUETA</div>
       
       <div class="input-group">
-        <label for="link-input">Link da Planilha (Google Drive)</label>
-        <input type="text" id="link-input" placeholder="Cole o link da planilha aqui..." oninput="gerar()">
+        <label for="link-input">Link ou ID da Planilha (Google Drive)</label>
+        <input type="text" id="link-input" placeholder="Cole o link ou ID da planilha..." oninput="gerar()">
       </div>
 
       <div class="input-group">
@@ -112,7 +116,8 @@
       <div class="panel-title">// PRÉ-VISUALIZAÇÃO (33x21mm)</div>
       <div class="preview-stage">
         <div class="bopp-label">
-          <img id="qr-img" src="" alt="QR Code">
+          <!-- Elemento SVG onde o código de barras será desenhado -->
+          <svg id="barcode-element"></svg>
           <div>
             <div class="label-code" id="lbl-code">LOTE 122 - MOD 4993</div>
             <div class="label-subtext" id="lbl-subtext">ANEL</div>
@@ -130,20 +135,32 @@
 
     function gerar() {
       var raw = document.getElementById('link-input').value.trim();
-      var urlFinal = "https://kelvin01lima-blip.github.io/OS-Viewer/";
+      var idParaBarras = "OS-122"; // Valor padrão
 
       if (raw.indexOf("docs.google.com/spreadsheets/d/") !== -1) {
         var m = raw.match(/\/d\/([a-zA-Z0-9-_]+)/);
         if (m && m[1]) {
-          urlFinal += "?p=" + m[1];
+          // Pega os últimos caracteres do ID da planilha para formar um código limpo e curto que cabe no leitor de barras
+          idParaBarras = m[1].substring(m[1].length - 8).toUpperCase();
         }
       } else if (raw !== "") {
-        urlFinal = raw;
+        idParaBarras = raw;
       }
 
-      // Parâmetros originais validados com correção Média (M) e tamanho ideal de renderização térmica
-      var src = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&margin=0&data=" + encodeURIComponent(urlFinal);
-      document.getElementById('qr-img').src = src;
+      // Gera o código de barras Code 128 perfeitamente legível na etiqueta térmica
+      try {
+        JsBarcode("#barcode-element", idParaBarras, {
+          format: "CODE128",
+          lineColor: "#000000",
+          width: 1.5,
+          height: 40,
+          displayValue: false, // Oculta o texto em cima para otimizar espaço e usar o nosso layout limpo
+          margin: 0
+        });
+      } catch (e) {
+        console.error("Erro ao gerar código de barras", e);
+      }
+
       atualizarTexto();
     }
 
